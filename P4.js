@@ -22,6 +22,17 @@ scene.add(camera);
 // SETUP ORBIT CONTROLS OF THE CAMERA
 var controls = new THREE.OrbitControls(camera);
 
+var torsoMatrix = getscaleMatrix(1,1,1);  
+var normalMaterial = new THREE.MeshNormalMaterial();
+
+//add play balls
+var playballtrans = gettransMatrix(0,0,7); 
+playbalmatrix = multiplyHelper(torsoMatrix,playballtrans);
+var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
+var playball = new THREE.Mesh( playballgeometry, normalMaterial );
+scene.add( playball );
+
+
 // ADAPT TO WINDOW RESIZE
 function resize() {
   renderer.setSize(window.innerWidth,window.innerHeight);
@@ -136,7 +147,8 @@ keyboard.domElement.addEventListener('keydown',function(event){
 // SETUP UPDATE CALL-BACK
 // Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
-  
+    renderer.render(scene,camera);
+
 }
 
 
