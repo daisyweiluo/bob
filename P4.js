@@ -20,6 +20,7 @@ camera.position.set(45,20,40);
 scene.add(camera);
 
 // SETUP ORBIT CONTROLS OF THE CAMERA
+// click on it, able to change its camera
 var controls = new THREE.OrbitControls(camera);
 
 //Torso Matrix
@@ -221,15 +222,13 @@ keyboard.domElement.addEventListener('keydown',function(event){
 // SETUP UPDATE CALL-BACK
 // Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
-          //Camera rotation with 0.0001 adjusting speed
-          var timer = 0.0001 * Date.now();
-          camera.position.x = Math.cos( timer ) * 70;
-          camera.position.z = Math.sin( timer ) * 70;
-          camera.lookAt( scene.position );
-
+          // //Camera rotation with 0.0001 adjusting speed
+          // var timer = 0.0001 * Date.now();
+          // camera.position.x = Math.cos( timer ) * 70;
+          // camera.position.z = Math.sin( timer ) * 70;
+           camera.lookAt( scene.position );
           requestAnimationFrame(update);
-
-          renderer.render(scene,camera);
+           renderer.render(scene,camera);
         }
 
 
