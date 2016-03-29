@@ -13,25 +13,29 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xFC9E55); // white background colour
 canvas.appendChild(renderer.domElement);
 
+//SETUP MOUSE
+var mouse = {x:0, y:0};
+
 // SETUP CAMERA
+/*player camera */
 var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
 camera.position.set(45,20,40);
-//camera.lookAt(scene.position);
 scene.add(camera);
 
 // SETUP ORBIT CONTROLS OF THE CAMERA
 // click on it, able to change its camera
 var controls = new THREE.OrbitControls(camera);
-
-//Torso Matrix
-var torsoMatrix = gettransMatrix(45,20,40);
+// controls.movementSpeed = 50;
+// controls.noFly= true;
+// controls.lookVertical=false;
 
 //Added Light
 var light = new THREE.DirectionalLight( 0xffffff );
 light.position.set( 0, 0, 1 );
 scene.add( light );
 
-//geo and Material for normal balls
+//Torso Matrix
+var torsoMatrix = gettransMatrix(45/2,20/2,40/2);
 
 
 //add random balls
@@ -70,8 +74,6 @@ for ( var i = 0; i < geometry.faces.length; i ++ ) {
       color = new THREE.Color( 0xffffff );
       color.setHSL( 0.0, ( p.y / rad[j] + 1 ) / 2, 0.5 );
       faces[b].vertexColors[ j ] = color;
-
-      
     }
   }
 }
@@ -95,11 +97,63 @@ for(var r=0; r<ballnumber; r++){
 
 //add play balls
 var normalMaterial = new THREE.MeshNormalMaterial();
-var playballtrans = gettransMatrix(0,0,1); 
-playbalmatrix = multiplyHelper(torsoMatrix,playballtrans);
+//var playbalmatrix = gettransMatrix(0,0,1); 
+// playbalmatrix.applyMatrix(torsoMatrix);
 var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
+playball.applyMatrix(torsoMatrix);
+playball.applyMatrix(gettransMatrix(0,0,0));
 scene.add( playball );
+camera.lookAt(playball.position);
+
+
+// LISTEN TO KEYBOARD
+var keyboard = new THREEx.KeyboardState();
+var keystep = 10;
+
+function onKeyDown(event)
+{
+  // TO-DO: BIND KEYS TO YOUR CONTROLS    
+  if(keyboard.eventMatches(event,"z"))
+  {  // Reveal/Hide helper grid
+    grid_state = !grid_state;
+    grid_state? scene.add(grid) : scene.remove(grid);
+  }
+
+ else if (keyboard.eventMatches(event,"w")){
+playball.position.x = playball.position.x-1;
+playball.position.y = playball.position.y-1;
+playball.position.z = playball.position.z-1;
+
+camera.lookAt(playball.position);
+renderer.render(scene,camera);
+
+ }   
+
+ else if (keyboard.eventMatches(event,"s")){
+playball.position.x = playball.position.x+1;
+playball.position.y = playball.position.y+1;
+playball.position.z = playball.position.z+1;
+
+
+camera.lookAt(playball.position);
+renderer.render(scene,camera);
+ }
+
+ else if (keyboard.eventMatches(event,"a")) {
+
+playball.applyMatrix(gettransMatrix(0,0,1));
+camera.lookAt(playball.position);
+renderer.render(scene,camera);
+ }
+  else if (keyboard.eventMatches(event,"d")) {
+    playball.applyMatrix(gettransMatrix(0,0,-1));
+camera.lookAt(playball.position);
+renderer.render(scene,camera);
+ }
+   else if (keyboard.eventMatches(event,"m")) {
+ }
+}
 
 // ADAPT TO WINDOW RESIZE
 function resize() {
@@ -228,10 +282,9 @@ function update() {
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
-           camera.lookAt( scene.position );
           requestAnimationFrame(update);
            renderer.render(scene,camera);
         }
 
-
-        update();
+keyboard.domElement.addEventListener('keydown', onKeyDown );
+update();
