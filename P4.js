@@ -85,9 +85,10 @@ new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wire
 var groups = [];
 for(var r=0; r<ballnumber; r++){
   groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
-  groups[r].position.x = Math.random()*20;
-  groups[r].position.y = Math.random()*20;
-  groups[r].position.z = Math.random()*20;
+
+  groups[r].position.x = Math.random()*(Math.round(Math.random())*2-1)*20;
+  groups[r].position.y = Math.random()*(Math.round(Math.random())*2-1)*20;
+  groups[r].position.z = Math.random()*(Math.round(Math.random())*2-1)*20;
   scene.add( groups[r] );
 }
 
@@ -222,10 +223,10 @@ keyboard.domElement.addEventListener('keydown',function(event){
 // Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
           //Camera rotation with 0.0001 adjusting speed
-          var timer = 0.0001 * Date.now();
-          camera.position.x = Math.cos( timer ) * 70;
-          camera.position.z = Math.sin( timer ) * 70;
-          camera.lookAt( scene.position );
+          // var timer = 0.0001 * Date.now();
+          // camera.position.x = Math.cos( timer ) * 70;
+          // camera.position.z = Math.sin( timer ) * 70;
+          // camera.lookAt( scene.position );
 
           requestAnimationFrame(update);
 
