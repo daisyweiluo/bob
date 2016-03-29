@@ -22,16 +22,82 @@ scene.add(camera);
 // SETUP ORBIT CONTROLS OF THE CAMERA
 var controls = new THREE.OrbitControls(camera);
 
-var torsoMatrix = getscaleMatrix(1,1,1);  
-var normalMaterial = new THREE.MeshNormalMaterial();
+//Torso Matrix
+var torsoMatrix = gettransMatrix(45,20,40);
+
+//Added Light
+var light = new THREE.DirectionalLight( 0xffffff );
+light.position.set( 0, 0, 1 );
+scene.add( light );
+
+//geo and Material for normal balls
+
+
+//add random balls
+var color;
+var p;
+var vertexIndex;
+var faceIndices = [ 'a', 'b', 'c' ];
+var rad = [];
+var faces = [];
+var geos =[];
+var ballnumber = 10;
+
+//generate randomized radius
+for(var r=0; r<ballnumber;  r++){
+  rad[r] = getRandomInt(0.5,5);
+  geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
+
+}
+
+//Geometry for each ball
+var geometry = geos[0];
+
+for ( var i = 0; i < geometry.faces.length; i ++ ) {
+  for(var b=0; b<ballnumber; b++){
+    faces[b] = geos[b].faces[i];
+    for( var j = 0; j < 3; j++ ) {
+      vertexIndex = faces[0][ faceIndices[ j ] ];
+      p = geometry.vertices[ vertexIndex ];
+      /*ball option 1*/
+      // color = new THREE.Color( 0xffffff );
+      // color.setHSL( ( p.y / rad[j] + 1 ) / 2, 1.0, 0.5 );
+      /*ball option 2*/
+      // color = new THREE.Color( 0xffffff );
+      // color.setHSL( 0.125 * vertexIndex/geometry.vertices.length, 1.0, 0.5 );
+      /*ball option 3*/
+      color = new THREE.Color( 0xffffff );
+      color.setHSL( 0.0, ( p.y / rad[j] + 1 ) / 2, 0.5 );
+      faces[b].vertexColors[ j ] = color;
+
+      
+    }
+  }
+}
+
+//random ball's material
+var materials = [
+new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 } ),
+new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true, transparent: true } )
+];
+
+//Add the balls to the scene
+var groups = [];
+for(var r=0; r<ballnumber; r++){
+  groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
+  groups[r].position.x = Math.random()*20;
+  groups[r].position.y = Math.random()*20;
+  groups[r].position.z = Math.random()*20;
+  scene.add( groups[r] );
+}
 
 //add play balls
-var playballtrans = gettransMatrix(0,0,7); 
+var normalMaterial = new THREE.MeshNormalMaterial();
+var playballtrans = gettransMatrix(0,0,1); 
 playbalmatrix = multiplyHelper(torsoMatrix,playballtrans);
 var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
 scene.add( playball );
-
 
 // ADAPT TO WINDOW RESIZE
 function resize() {
@@ -46,18 +112,18 @@ resize();
 
 //SCROLLBAR FUNCTION DISABLE
 window.onscroll = function () {
-     window.scrollTo(0,0);
-   }
+ window.scrollTo(0,0);
+}
 
 // SETUP HELPER GRID
 // Note: Press Z to show/hide
 var gridGeometry = new THREE.Geometry();
 var i;
 for(i=-50;i<51;i+=2) {
-    gridGeometry.vertices.push( new THREE.Vector3(i,0,-50));
-    gridGeometry.vertices.push( new THREE.Vector3(i,0,50));
-    gridGeometry.vertices.push( new THREE.Vector3(-50,0,i));
-    gridGeometry.vertices.push( new THREE.Vector3(50,0,i));
+  gridGeometry.vertices.push( new THREE.Vector3(i,0,-50));
+  gridGeometry.vertices.push( new THREE.Vector3(i,0,50));
+  gridGeometry.vertices.push( new THREE.Vector3(-50,0,i));
+  gridGeometry.vertices.push( new THREE.Vector3(50,0,i));
 }
 
 var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
@@ -84,25 +150,25 @@ function getRotMatrix(p, str){
   switch(str)
   {case "x":
   var obj = new THREE.Matrix4().set(1,        0,         0,        0, 
-                                            0, Math.cos(p),-Math.sin(p), 0, 
-                                            0, Math.sin(p), Math.cos(p), 0,
-                                            0,        0,         0,        1);
+    0, Math.cos(p),-Math.sin(p), 0, 
+    0, Math.sin(p), Math.cos(p), 0,
+    0,        0,         0,        1);
   return obj;
   break;
 
   case "y":
   var obj = new THREE.Matrix4().set(Math.cos(p),        0,         -Math.sin(p),         0, 
-                                            0,        1,        0,                      0, 
-                                Math.sin(p),         0,         Math.cos(p),          0,
-                                            0,        0,         0,                     1);
+    0,        1,        0,                      0, 
+    Math.sin(p),         0,         Math.cos(p),          0,
+    0,        0,         0,                     1);
   return obj;
   break;
 
   case "z":
   var obj = new THREE.Matrix4().set(Math.cos(p),       -Math.sin(p),         0,        0, 
-                                 Math.sin(p),       Math.cos(p),          0,        0, 
-                                            0,                    0,        1,        0,
-                                            0,                    0,        0,        1);
+   Math.sin(p),       Math.cos(p),          0,        0, 
+   0,                    0,        1,        0,
+   0,                    0,        0,        1);
   return obj;
   break;
 
@@ -110,7 +176,7 @@ function getRotMatrix(p, str){
   default:
   break;
 
-  }
+}
 
 }
 
@@ -135,6 +201,14 @@ function multiplyHelper(m1,m2){
   return obj;
 }
 
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+ function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // LISTEN TO KEYBOARD
 // Hint: Pay careful attention to how the keys already specified work!
 var keyboard = new THREEx.KeyboardState();
@@ -142,14 +216,21 @@ var grid_state = false;
 var key;
 keyboard.domElement.addEventListener('keydown',function(event){
 
-    });
+});
 
 // SETUP UPDATE CALL-BACK
 // Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
-    renderer.render(scene,camera);
+          //Camera rotation with 0.0001 adjusting speed
+          var timer = 0.0001 * Date.now();
+          camera.position.x = Math.cos( timer ) * 70;
+          camera.position.z = Math.sin( timer ) * 70;
+          camera.lookAt( scene.position );
 
-}
+          requestAnimationFrame(update);
+
+          renderer.render(scene,camera);
+        }
 
 
-update();
+        update();
