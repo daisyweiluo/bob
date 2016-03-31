@@ -15,13 +15,16 @@
 
       #info {
         position: absolute;
-        top: 0px; width: 100%;
-        padding: 5px;
-        text-align: center;
+        top: 8px; width: 10%;
+        padding: 15px;
+        text-align: left;
+        font-size: 100%;
+        background-color: white;
+        outline-style: dotted;
       }
 
       a {
-        color: #0080ff;
+        color: #008000;
         text-decoration: none;
       }
 
@@ -41,6 +44,14 @@
   </head>
   <body>
     <div id="canvas"></div>
+    <div id="info">
+    <info>
+            <a>Score:</a>
+            <a id="Score"></a>  
+            <br/>
+            <a>Time:</a>
+            <a id="Time"></a>
+    </info>
     <script src="js/three.min.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/SourceLoader.js"></script>

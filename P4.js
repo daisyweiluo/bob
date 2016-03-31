@@ -12,6 +12,10 @@ var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({ alpha: true } );
 renderer.setClearColor( 0x000000, 0 ); // the default
 //renderer.setClearColor(0xFC9E55); // white background colour
+// var node = document.createElement("P");                 // Create a <li> node
+// var textnode = document.createTextNode("Score");         // Create a text node
+// node.appendChild(textnode);                              // Append the text to <li>
+// canvas.appendChild(node);
 canvas.appendChild(renderer.domElement);
 var textureCube;
 
@@ -75,6 +79,22 @@ var material = new THREE.ShaderMaterial({
 skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 500, 500, 500, 1, 1, 1, null, true ), material );
 skyboxMesh.doubleSided = true;
 scene.add(skyboxMesh);
+
+
+//score and time board
+var score=0;
+var seconds=9;
+var second = 0;
+document.getElementById("Time").innerHTML = 10;
+interval = setInterval(function() {
+  document.getElementById("Time").innerHTML = seconds-second;
+        if (second >= seconds) {
+        //alert("Game Over");
+        clearInterval(interval);
+        }
+        second++;
+    }, 1000);
+document.getElementById("Score").innerHTML = score;
 
 //add random balls
 var color;
