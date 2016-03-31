@@ -24,7 +24,7 @@ scene.add(camera);
 
 // SETUP ORBIT CONTROLS OF THE CAMERA
 // click on it, able to change its camera
-var controls = new THREE.OrbitControls(camera);
+//var controls = new THREE.OrbitControls(camera);
 // controls.movementSpeed = 50;
 // controls.noFly= true;
 // controls.lookVertical=false;
@@ -34,9 +34,20 @@ var light = new THREE.DirectionalLight( 0xffffff );
 light.position.set( 0, 0, 1 );
 scene.add( light );
 
+//motion parameters
+var motion = {
+  position : new THREE.Vector3(), velocity : new THREE.Vector3(),
+  forward : new THREE.Vector3(), up : new THREE.Vector3(0,1,0)
+};
+
 //Torso Matrix
 var torsoMatrix = gettransMatrix(45/2,20/2,40/2);
+motion.position = new THREE.Vector3(45/2,20/2,40/2);
 
+//Set direction
+motion.forward.subVectors(motion.position,camera.position);
+motion.forward.normalize();
+console.log(motion.forward);
 
 //add random balls
 var color;
@@ -101,11 +112,10 @@ var normalMaterial = new THREE.MeshNormalMaterial();
 // playbalmatrix.applyMatrix(torsoMatrix);
 var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
-playball.applyMatrix(torsoMatrix);
-playball.applyMatrix(gettransMatrix(0,0,0));
+playball.position = motion.position;
+playball.up= motion.up;
 scene.add( playball );
 camera.lookAt(playball.position);
-
 
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
@@ -121,19 +131,20 @@ function onKeyDown(event)
   }
 
  else if (keyboard.eventMatches(event,"w")){
-playball.position.x = playball.position.x-1;
-playball.position.y = playball.position.y-1;
-playball.position.z = playball.position.z-1;
+playball.position.x = playball.position.x+motion.forward.x;
+playball.position.y = playball.position.y+motion.forward.y;
+playball.position.z = playball.position.z+motion.forward.z;
 
+camera.fov+=10;
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
 
  }   
 
  else if (keyboard.eventMatches(event,"s")){
-playball.position.x = playball.position.x+1;
-playball.position.y = playball.position.y+1;
-playball.position.z = playball.position.z+1;
+playball.position.x = playball.position.x-motion.forward.x;
+playball.position.y = playball.position.y-motion.forward.y;
+playball.position.z = playball.position.z-motion.forward.z;
 
 
 camera.lookAt(playball.position);
@@ -151,7 +162,101 @@ renderer.render(scene,camera);
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
  }
-   else if (keyboard.eventMatches(event,"m")) {
+   else if (keyboard.eventMatches(event,"left")) {
+
+    rotObjectMatrix = new THREE.Matrix4();
+
+    var xAxis = new THREE.Vector3(0,1,0);
+
+    //playball self orbit
+    // rotObjectMatrix.makeRotationAxis(xAxis.normalize(), 0.1/10);
+    // rotObjectMatrix.multiply(playball.matrix);
+    // playball.matrix = rotObjectMatrix;
+    // playball.rotation.setFromRotationMatrix(playball.matrix);
+
+    //camera orbit
+    var rotateV = getRotMatrix(-0.1,"y");
+    var cameraRot=multiplyHelper(camera.matrix,rotateV);
+    var cameraRott=multiplyHelper(rotateV,cameraRot);
+    camera.setMatrix(cameraRott);
+
+    // var forwardMatrix = vec3toMatrix(motion.forward);
+    // var forwardRot=multiplyHelper(forwardMatrix ,rotateV);
+    // var forwardRott=multiplyHelper(rotateV,forwardRot);
+    // motion.forward.applyAxisMatrix(xAis, 0.1);
+
+    camera.lookAt(playball.position);
+    motion.forward.subVectors(playball.position,camera.position);
+    motion.forward.normalize();
+
+ }
+    else if (keyboard.eventMatches(event,"right")) {
+
+    rotObjectMatrix = new THREE.Matrix4();
+
+    var xAxis = new THREE.Vector3(0,1,0);
+
+    var rotateV = getRotMatrix(+0.1,"y");
+    var cameraRot=multiplyHelper(camera.matrix,rotateV);
+    var cameraRott=multiplyHelper(rotateV,cameraRot);
+    camera.setMatrix(cameraRott);
+
+    // var forwardMatrix = vec3toMatrix(motion.forward);
+    // var forwardRot=multiplyHelper(forwardMatrix ,rotateV);
+    // var forwardRott=multiplyHelper(rotateV,forwardRot);
+    // motion.forward.applyAxisMatrix(xAis, -0.1);
+
+    camera.lookAt(playball.position);
+
+    motion.forward.subVectors(playball.position,camera.position);
+    motion.forward.normalize();
+
+ }
+
+     else if (keyboard.eventMatches(event,"down")) {
+
+    rotObjectMatrix = new THREE.Matrix4();
+
+    var xAxis = new THREE.Vector3(1,0,0);
+
+    var rotateV = getRotMatrix(-0.1,"x");
+    var cameraRot=multiplyHelper(camera.matrix,rotateV);
+    var cameraRott=multiplyHelper(rotateV,cameraRot);
+    camera.setMatrix(cameraRott);
+
+    // var forwardMatrix = vec3toMatrix(motion.forward);
+    // var forwardRot=multiplyHelper(forwardMatrix ,rotateV);
+    // var forwardRott=multiplyHelper(rotateV,forwardRot);
+    // motion.forward.applyAxisMatrix(xAis, -0.1);
+
+    camera.lookAt(playball.position);
+
+    motion.forward.subVectors(playball.position,camera.position);
+    motion.forward.normalize();
+
+ }
+
+      else if (keyboard.eventMatches(event,"up")) {
+
+    rotObjectMatrix = new THREE.Matrix4();
+
+    var xAxis = new THREE.Vector3(1,0,0);
+
+    var rotateV = getRotMatrix(0.1,"x");
+    var cameraRot=multiplyHelper(camera.matrix,rotateV);
+    var cameraRott=multiplyHelper(rotateV,cameraRot);
+    camera.setMatrix(cameraRott);
+
+    // var forwardMatrix = vec3toMatrix(motion.forward);
+    // var forwardRot=multiplyHelper(forwardMatrix ,rotateV);
+    // var forwardRott=multiplyHelper(rotateV,forwardRot);
+    // motion.forward.applyAxisMatrix(xAis, -0.1);
+
+    camera.lookAt(playball.position);
+
+    motion.forward.subVectors(playball.position,camera.position);
+    motion.forward.normalize();
+
  }
 }
 
@@ -257,6 +362,11 @@ function multiplyHelper(m1,m2){
   return obj;
 }
 
+function vec3toMatrix(v){
+  var obj = new THREE.Matrix4().set(v.x,0,0,0, 0,v.y,0,0, 0,0,v.z,0, 0,0,0,1);
+  return obj;
+}
+
 /**
  * Returns a random integer between min (inclusive) and max (inclusive)
  * Using Math.round() will give you a non-uniform distribution!
@@ -283,7 +393,7 @@ function update() {
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
           requestAnimationFrame(update);
-           renderer.render(scene,camera);
+          renderer.render(scene,camera);
         }
 
 keyboard.domElement.addEventListener('keydown', onKeyDown );
