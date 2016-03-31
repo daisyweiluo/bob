@@ -9,9 +9,11 @@ THREE.Object3D.prototype.setMatrix = function(a) {
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
-var renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xFC9E55); // white background colour
+var renderer = new THREE.WebGLRenderer({ alpha: true } );
+renderer.setClearColor( 0x000000, 0 ); // the default
+//renderer.setClearColor(0xFC9E55); // white background colour
 canvas.appendChild(renderer.domElement);
+var textureCube;
 
 //SETUP MOUSE
 var mouse = {x:0, y:0};
@@ -48,6 +50,31 @@ motion.position = new THREE.Vector3(45/2,20/2,40/2);
 motion.forward.subVectors(motion.position,camera.position);
 motion.forward.normalize();
 console.log(motion.forward);
+
+// add background
+var urlPrefix = "images/";
+var urls = [ urlPrefix + "posx.jpg", urlPrefix + "negx.jpg",
+    urlPrefix + "posy.jpg", urlPrefix + "negy.jpg",
+    urlPrefix + "posz.jpg", urlPrefix + "negz.jpg" ];
+
+var textureCube = THREE.ImageUtils.loadTextureCube(urls);
+
+
+var shader = THREE.ShaderLib['cube'];
+var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+uniforms['tCube'].value= textureCube; // textureCube has been init before
+var material = new THREE.ShaderMaterial({
+    fragmentShader    : shader.fragmentShader,
+    vertexShader  : shader.vertexShader,
+    uniforms  : uniforms,
+    depthWrite: false,
+    side: THREE.DoubleSide
+});
+
+// build the skybox Mesh 
+skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 500, 500, 500, 1, 1, 1, null, true ), material );
+skyboxMesh.doubleSided = true;
+scene.add(skyboxMesh);
 
 //add random balls
 var color;
@@ -392,8 +419,11 @@ function update() {
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
+          
           requestAnimationFrame(update);
-          renderer.render(scene,camera);
+
+           renderer.render(scene,camera);
+
         }
 
 keyboard.domElement.addEventListener('keydown', onKeyDown );
