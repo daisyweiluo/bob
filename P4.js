@@ -1,5 +1,11 @@
 // Luxi Xu, Wei Luo Project 4
 
+var instruction="Here is the instruction of the BOB game:"+"\n"+
+                 "You have a limited of 10 seconds, you are ranked by the score(depends on the radius of the colorful playball).\n"
+                 +"You can only eat score balls whose radius is samller and playball become larger, otherwise, game over.\n"
+                 + "AWSD to control direction of playball and left/right/up/down to control the view of camera.\n"
+                 + "Enjoy the game!";
+alert(instruction);
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
   this.matrix=a;
