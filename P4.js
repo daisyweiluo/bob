@@ -187,8 +187,16 @@ function collision(){
         dis=Math.sqrt((xPlay-xBall)*(xPlay-xBall)+(yPlay-yBall)*(yPlay-yBall)+(zPlay-zBall)*(zPlay-zBall));
         radDis= playballRad+ rad[r];
         if (dis<=radDis){
+          if (playballRad >= rad[r]){
+          scene.remove(groups[r]);
+          //playballRad=playballRad+rad[r];
           console.log("collision");
-        }
+          }
+          else {
+            alert("eat balls bigger, game over");
+            location.close();
+          }
+      }
     }
 }
 
