@@ -194,7 +194,7 @@ function collision(){
           }
           else {
             alert("eat balls bigger, game over");
-            location.close();
+            location.reload();
           }
       }
     }
