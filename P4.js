@@ -190,6 +190,14 @@ function collision(){
           if (playballRad >= rad[r]){
           scene.remove(groups[r]);
           //playballRad=playballRad+rad[r];
+          // playballRad += rad[r];
+          // scene.remove(playball);
+          // var playballgeometry = new THREE.SphereGeometry( playballRad, 32, 32 );
+          // var playball = new THREE.Mesh( playballgeometry, normalMaterial );
+          // playball.position = motion.position;
+          // playball.up= motion.up;
+          // scene.add( playball );
+          // camera.lookAt(playball.position);
           console.log("collision");
           }
           else {
