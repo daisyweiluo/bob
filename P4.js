@@ -59,7 +59,7 @@ motion.position = new THREE.Vector3(45/2,20/2,40/2);
 //Set direction
 motion.forward.subVectors(motion.position,camera.position);
 motion.forward.normalize();
-console.log(motion.forward);
+//console.log(motion.forward);
 
 // add background
 var urlPrefix = "images/";
@@ -164,6 +164,7 @@ var normalMaterial = new THREE.MeshNormalMaterial();
 //var playbalmatrix = gettransMatrix(0,0,1); 
 // playbalmatrix.applyMatrix(torsoMatrix);
 var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
+playballRad=2;
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
 playball.position = motion.position;
 playball.up= motion.up;
@@ -173,6 +174,25 @@ camera.lookAt(playball.position);
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
+
+function collision(){
+    var xPlay = playball.position.x;
+    var yPlay = playball.position.y;
+    var zPlay = playball.position.z;
+
+    for (var r=0; r<ballnumber;r++){
+        var xBall = groups[r].position.x;
+        var yBall = groups[r].position.y;
+        var zBall = groups[r].position.z;
+        dis=Math.sqrt((xPlay-xBall)*(xPlay-xBall)+(yPlay-yBall)*(yPlay-yBall)+(zPlay-zBall)*(zPlay-zBall));
+        radDis= playballRad+ rad[r];
+        if (dis<=radDis){
+          console.log("collision");
+        }
+    }
+}
+
+collision();
 
 function onKeyDown(event)
 {
@@ -184,10 +204,11 @@ function onKeyDown(event)
   }
 
  else if (keyboard.eventMatches(event,"w")){
+  //collision();
 playball.position.x = playball.position.x+motion.forward.x;
 playball.position.y = playball.position.y+motion.forward.y;
 playball.position.z = playball.position.z+motion.forward.z;
-
+//console.log(playball.position);
 camera.fov+=10;
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
@@ -195,22 +216,23 @@ renderer.render(scene,camera);
  }   
 
  else if (keyboard.eventMatches(event,"s")){
+    //collision();
 playball.position.x = playball.position.x-motion.forward.x;
 playball.position.y = playball.position.y-motion.forward.y;
 playball.position.z = playball.position.z-motion.forward.z;
-
-
+//console.log(playball.position);
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
  }
 
  else if (keyboard.eventMatches(event,"a")) {
-
+  //collision();
 playball.applyMatrix(gettransMatrix(0,0,1));
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
  }
   else if (keyboard.eventMatches(event,"d")) {
+      //collision();
     playball.applyMatrix(gettransMatrix(0,0,-1));
 camera.lookAt(playball.position);
 renderer.render(scene,camera);
@@ -446,11 +468,10 @@ function update() {
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
           
-          requestAnimationFrame(update);
-
-           renderer.render(scene,camera);
-
-        }
+            requestAnimationFrame(update);
+            renderer.render(scene,camera);
+            collision();
+  }
 
 keyboard.domElement.addEventListener('keydown', onKeyDown );
 update();
