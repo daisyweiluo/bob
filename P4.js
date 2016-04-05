@@ -167,6 +167,7 @@ camera.lookAt(playball.position);
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
+var velocity =5;
 
 function onKeyDown(event)
 {
@@ -178,9 +179,9 @@ function onKeyDown(event)
   }
 
  else if (keyboard.eventMatches(event,"w")){
-playball.position.x = playball.position.x+motion.forward.x;
-playball.position.y = playball.position.y+motion.forward.y;
-playball.position.z = playball.position.z+motion.forward.z;
+playball.position.x = playball.position.x+motion.forward.x*velocity;
+playball.position.y = playball.position.y+motion.forward.y*velocity;
+playball.position.z = playball.position.z+motion.forward.z*velocity;
 
 camera.fov+=10;
 camera.lookAt(playball.position);
@@ -441,7 +442,6 @@ function update() {
           // camera.position.z = Math.sin( timer ) * 70;
           
           requestAnimationFrame(update);
-
            renderer.render(scene,camera);
 
         }
