@@ -1,11 +1,10 @@
 // Luxi Xu, Wei Luo Project 4
 
-var instruction="Here is the instruction of the BOB game:"+"\n"+
-                 "You have a limited of 10 seconds, you are ranked by the score(depends on the radius of the colorful playball).\n"
-                 +"You can only eat score balls whose radius is samller and playball become larger, otherwise, game over.\n"
-                 + "AWSD to control direction of playball and left/right/up/down to control the view of camera.\n"
-                 + "Enjoy the game!";
-alert(instruction);
+// var instruction="Here is the instruction of the BOB game:"+"\n"+
+//                  "You have a limited of 10 seconds, you are ranked by the score(depends on the radius of the colorful playball).\n"
+//                  +"You can only eat score balls whose radius is samller and playball become larger, otherwise, game over.\n"
+//                  + "AWSD to control direction of playball and left/right/up/down to control the view of camera.\n"
+//                  + "Enjoy the game!";
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
   this.matrix=a;
@@ -135,10 +134,10 @@ scene.add(skyboxMesh);
 
 
 //score and time board
-var score=0;
-var seconds=9;
+var score=2;
+var seconds=29;
 var second = 0;
-document.getElementById("Time").innerHTML = 10;
+document.getElementById("Time").innerHTML = 30;
 interval = setInterval(function() {
   document.getElementById("Time").innerHTML = seconds-second;
         if (second >= seconds) {
@@ -148,6 +147,9 @@ interval = setInterval(function() {
         second++;
     }, 1000);
 document.getElementById("Score").innerHTML = score;
+
+
+
 
 //add random balls
 var color;
@@ -209,6 +211,7 @@ for(var r=0; r<ballnumber; r++){
 //add play balls
 var normalMaterial = new THREE.MeshNormalMaterial();
 var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
+playballgeometry.dynamic=true;
 playballRad=2;
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
 var positionMatrix = gettransMatrix(0,0,0);
@@ -236,11 +239,12 @@ var keystep = 10;
 var velocity = 6;
 
 function collision(){
-    var xPlay = playball.position.x;
-    var yPlay = playball.position.y;
-    var zPlay = playball.position.z;
+
 
     for (var r=0; r<ballnumber;r++){
+          var xPlay = playball.position.x;
+          var yPlay = playball.position.y;
+          var zPlay = playball.position.z;
         var xBall = groups[r].position.x;
         var yBall = groups[r].position.y;
         var zBall = groups[r].position.z;
@@ -248,17 +252,9 @@ function collision(){
         radDis= playballRad+ rad[r];
         if (dis<=radDis){
           if (playballRad >= rad[r]){
-          scene.remove(groups[r]);
-          //playballRad=playballRad+rad[r];
-          // playballRad += rad[r];
-          // scene.remove(playball);
-          // var playballgeometry = new THREE.SphereGeometry( playballRad, 32, 32 );
-          // var playball = new THREE.Mesh( playballgeometry, normalMaterial );
-          // playball.position = motion.position;
-          // playball.up= motion.up;
-          // scene.add( playball );
-          // camera.lookAt(playball.position);
-          console.log("collision");
+            scene.remove(groups[r]);
+            //playballgeometry.sphereGeometry(10,32,32);
+            console.log("collision");
           }
           else {
             alert("eat balls bigger, game over");
