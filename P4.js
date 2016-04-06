@@ -200,9 +200,9 @@ var groups = [];
 for(var r=0; r<ballnumber; r++){
   groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
   //keep the ball generated outside the scoreball
-  groups[r].position.x = 10+Math.random()*(Math.round(Math.random())*2-1)*50;
+  groups[r].position.x = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
   groups[r].position.y = 0;
-  groups[r].position.z = 10+Math.random()*(Math.round(Math.random())*2-1)*50;
+  groups[r].position.z = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
   scene.add( groups[r] );
 }
 
@@ -342,7 +342,7 @@ renderer.render(scene,camera);
  }
    else if (keyboard.eventMatches(event,"left")) {
 
-    playball.rotation.y+=0.25;
+    playball.rotation.y-=0.25;
    // var rotObjectMatrix = new THREE.Matrix4();
 
 
@@ -364,7 +364,7 @@ renderer.render(scene,camera);
 
  }
     else if (keyboard.eventMatches(event,"right")) {
-    playball.rotation.y-=0.25;
+    playball.rotation.y+=0.25;
     // var rotObjectMatrix = new THREE.Matrix4();
 
     // var axis = new THREE.Vector3(0,1,0);
