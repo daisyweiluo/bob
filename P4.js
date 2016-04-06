@@ -76,7 +76,6 @@ var mouse = {x:0, y:0};
 // SETUP CAMERA
 /*player camera */
 var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
-camera.position.set(0,0,0);
 scene.add(camera);
 
 // ADDING THE AXIS DEBUG VISUALIZATIONS
@@ -158,11 +157,11 @@ var faceIndices = [ 'a', 'b', 'c' ];
 var rad = [];
 var faces = [];
 var geos =[];
-var ballnumber = 10;
+var ballnumber = 50;
 
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
-  rad[r] = getRandomInt(0.5,5);
+  rad[r] = getRandomInt(0.5,3);
   geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
 
 }
@@ -201,9 +200,9 @@ var groups = [];
 for(var r=0; r<ballnumber; r++){
   groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
   //keep the ball generated outside the scoreball
-  groups[r].position.x = 5+Math.random()*(Math.round(Math.random())*2-1)*20;
-  groups[r].position.y = 5+Math.random()*(Math.round(Math.random())*2-1)*20;
-  groups[r].position.z = 5+Math.random()*(Math.round(Math.random())*2-1)*20;
+  groups[r].position.x = 10+Math.random()*(Math.round(Math.random())*2-1)*50;
+  groups[r].position.y = 0;
+  groups[r].position.z = 10+Math.random()*(Math.round(Math.random())*2-1)*50;
   scene.add( groups[r] );
 }
 
@@ -217,16 +216,9 @@ var rotationMatrix = getRotMatrix(0,"x");
 var playballMatrix = multiplyHelper(positionMatrix,rotationMatrix);
 playball.setMatrix(playballMatrix);
 
-//add testing ball
-var testingMaterial = new THREE.MeshNormalMaterial();
-var testinggeometry = new THREE.SphereGeometry( 1, 32, 32 );
-var testingball = new THREE.Mesh( testinggeometry, testingMaterial );
-testingball.parent=playball;
-scene.add(testingball);
-
 
 //camera as a child of playball
-var transMatrix = gettransMatrix(45,20,40);
+var transMatrix = gettransMatrix(45,10,40);
 var cameraMatrix = multiplyHelper(playballMatrix, transMatrix);
 camera.applyMatrix(cameraMatrix);
 
@@ -241,7 +233,7 @@ motion.forward.normalize();
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
-var velocity =5;
+var velocity = 6;
 
 function collision(){
     var xPlay = playball.position.x;
@@ -288,8 +280,7 @@ function onKeyDown(event)
   }
 
  else if (keyboard.eventMatches(event,"w")){
-  playball.applyMatrix(gettransMatrix(motion.forward.x*velocity,motion.forward.y*velocity, motion.forward.z*velocity));
-  testingball.applyMatrix(gettransMatrix(motion.forward.x*velocity,motion.forward.y*velocity, motion.forward.z*velocity));
+  playball.applyMatrix(gettransMatrix(motion.forward.x*velocity,0, motion.forward.z*velocity));
 
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
@@ -301,9 +292,7 @@ renderer.render(scene,camera);
 
  else if (keyboard.eventMatches(event,"s")){
     //collision();
-
-  playball.applyMatrix(gettransMatrix(-motion.forward.x*velocity,-motion.forward.y*velocity, -motion.forward.z*velocity));
-  //testingball.applyMatrix(gettransMatrix(-motion.forward.x*velocity,-motion.forward.y*velocity, -motion.forward.z*velocity));
+  playball.applyMatrix(gettransMatrix(-motion.forward.x*velocity,0, -motion.forward.z*velocity));
 
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
@@ -314,21 +303,33 @@ renderer.render(scene,camera);
 
  else if (keyboard.eventMatches(event,"a")) {
   //collision();
-playball.applyMatrix(gettransMatrix(0,0,1));
-//testingball.applyMatrix(gettransMatrix(0,0,1));
+  var axis =  new THREE.Vector3(0,-1,0);
+
+  var leftdirection = new THREE.Vector3();
+
+  leftdirection.crossVectors(motion.forward, axis).normalize();
+
+  playball.applyMatrix(gettransMatrix(leftdirection.x*velocity,0, leftdirection.z*velocity));
 
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
+
 camera.setMatrix(cameratransMatrix);
+
 camera.lookAt(playball.position);
+
 
 motion.forward.subVectors(playball.position,camera.position);
 motion.forward.normalize();
+motion.forward.y=0;
+
 renderer.render(scene,camera);
  }
   else if (keyboard.eventMatches(event,"d")) {
 //collision();
-playball.applyMatrix(gettransMatrix(0,0,-1));
-//testingball.applyMatrix(gettransMatrix(0,0,-1));
+  var axis =  new THREE.Vector3(0,1,0);
+  var rightdirection = new THREE.Vector3();
+  rightdirection.crossVectors(motion.forward, axis).normalize();
+  playball.applyMatrix(gettransMatrix(rightdirection.x,0, rightdirection.z));
 
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
@@ -336,19 +337,20 @@ camera.lookAt(playball.position);
 
 motion.forward.subVectors(playball.position,camera.position);
 motion.forward.normalize();
+motion.forward.y=0;
 renderer.render(scene,camera);
  }
    else if (keyboard.eventMatches(event,"left")) {
 
-    //playball.rotation.y-=1/10;
-   var rotObjectMatrix = new THREE.Matrix4();
+    playball.rotation.y+=0.25;
+   // var rotObjectMatrix = new THREE.Matrix4();
 
 
-    var axis = new THREE.Vector3(0,1,0);
-    rotObjectMatrix.makeRotationAxis(axis.normalize(), -1/10);
-    rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
-    playball.setMatrix(rotObjectMatrix);
-    playball.rotation.setFromRotationMatrix(playball.matrix);
+   //  var axis = new THREE.Vector3(0,1,0);
+   //  rotObjectMatrix.makeRotationAxis(axis.normalize(), -1/10);
+   //  rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
+   //  playball.setMatrix(rotObjectMatrix);
+   //  playball.rotation.setFromRotationMatrix(playball.matrix);
 
     var cameraRotMatrix = multiplyHelper(playball.matrix, transMatrix);
     camera.setMatrix(cameraRotMatrix);
@@ -357,19 +359,21 @@ renderer.render(scene,camera);
 
     motion.forward.subVectors(playball.position,camera.position);
     motion.forward.normalize();
+    motion.forward.y=0;
+
 
  }
     else if (keyboard.eventMatches(event,"right")) {
-    //playball.rotation.y-=1/10;
-    var rotObjectMatrix = new THREE.Matrix4();
+    playball.rotation.y-=0.25;
+    // var rotObjectMatrix = new THREE.Matrix4();
 
-    var axis = new THREE.Vector3(0,1,0);
+    // var axis = new THREE.Vector3(0,1,0);
 
-    var axis = new THREE.Vector3(0,1,0);
-    rotObjectMatrix.makeRotationAxis(axis.normalize(), +1/10);
-    rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
-    playball.setMatrix(rotObjectMatrix);
-    playball.rotation.setFromRotationMatrix(playball.matrix);
+    // var axis = new THREE.Vector3(0,1,0);
+    // rotObjectMatrix.makeRotationAxis(axis.normalize(), +1/10);
+    // rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
+    // playball.setMatrix(rotObjectMatrix);
+    // playball.rotation.setFromRotationMatrix(playball.matrix);
 
     //playball.rotateOnAxis(axis,+1/10);
 
@@ -380,6 +384,8 @@ renderer.render(scene,camera);
 
     motion.forward.subVectors(playball.position,camera.position);
     motion.forward.normalize();
+    motion.forward.y=0;
+
 
  }
 
@@ -391,12 +397,13 @@ renderer.render(scene,camera);
       var axis = new THREE.Vector3();
 
       axis.crossVectors(ball2camera, camera.up).normalize();
-      var rotObjectMatrix = new THREE.Matrix4();
+      playball.rotateOnAxis(axis, -0.25);
+      // var rotObjectMatrix = new THREE.Matrix4();
 
-      rotObjectMatrix.makeRotationAxis(axis, -1/10);
-      rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
-      playball.setMatrix(rotObjectMatrix);
-      playball.rotation.setFromRotationMatrix(playball.matrix);
+      // rotObjectMatrix.makeRotationAxis(axis, -1/10);
+      // rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
+      // playball.setMatrix(rotObjectMatrix);
+      // playball.rotation.setFromRotationMatrix(playball.matrix);
 
       var cameraRotMatrix = multiplyHelper(playball.matrix, transMatrix);
       camera.setMatrix(cameraRotMatrix);
@@ -405,6 +412,8 @@ renderer.render(scene,camera);
 
     motion.forward.subVectors(playball.position,camera.position);
     motion.forward.normalize();
+    motion.forward.y=0;
+
 
  }
 
@@ -415,12 +424,16 @@ renderer.render(scene,camera);
       var axis = new THREE.Vector3();
 
       axis.crossVectors(ball2camera, camera.up).normalize();
-      var rotObjectMatrix = new THREE.Matrix4();
+            var axis = new THREE.Vector3();
 
-      rotObjectMatrix.makeRotationAxis(axis, +1/10);
-      rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
-      playball.setMatrix(rotObjectMatrix);
-      playball.rotation.setFromRotationMatrix(playball.matrix);
+      axis.crossVectors(ball2camera, camera.up).normalize();
+      playball.rotateOnAxis(axis, 0.25);
+      // var rotObjectMatrix = new THREE.Matrix4();
+
+      // rotObjectMatrix.makeRotationAxis(axis, +1/10);
+      // rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
+      // playball.setMatrix(rotObjectMatrix);
+      // playball.rotation.setFromRotationMatrix(playball.matrix);
 
       var cameraRotMatrix = multiplyHelper(playball.matrix, transMatrix);
       camera.setMatrix(cameraRotMatrix);
@@ -429,6 +442,8 @@ renderer.render(scene,camera);
 
     motion.forward.subVectors(playball.position,camera.position);
     motion.forward.normalize();
+    motion.forward.y=0;
+
 
  }
 }
@@ -453,15 +468,18 @@ window.onscroll = function () {
 // Note: Press Z to show/hide
 var gridGeometry = new THREE.Geometry();
 var i;
-for(i=-50;i<51;i+=2) {
-  gridGeometry.vertices.push( new THREE.Vector3(i,0,-50));
-  gridGeometry.vertices.push( new THREE.Vector3(i,0,50));
-  gridGeometry.vertices.push( new THREE.Vector3(-50,0,i));
-  gridGeometry.vertices.push( new THREE.Vector3(50,0,i));
+
+for(i=-500;i<501;i+=2) {
+  gridGeometry.vertices.push( new THREE.Vector3(i,-2,-500));
+  gridGeometry.vertices.push( new THREE.Vector3(i,-2,500));
+  gridGeometry.vertices.push( new THREE.Vector3(-500,-2,i));
+  gridGeometry.vertices.push( new THREE.Vector3(500,-2,i));
 }
 
 var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
+grid_state=true;
+scene.add(grid);
 
 // MATERIALS
 // Note: Feel free to be creative with this! 
