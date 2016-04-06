@@ -13,18 +13,29 @@
         font-size: 13px;
       }
 
-      #info {
+      info {
         position: absolute;
         top: 8px; width: 10%;
         padding: 15px;
         text-align: left;
         font-size: 100%;
-        background-color: white;
-        outline-style: dotted;
+        font-style: italic;
+        font-family: "Times New Roman", Times, serif;
       }
 
+      hh {
+         position: absolute;
+         left: 10px;
+         bottom: 20px;
+        padding: 15px;
+        width: 30%;
+        height:10%;
+        font-size: 100%;
+        font-style: italic;
+        font-family: "Times New Roman", Times, serif;
+      }
       a {
-        color: #008000;
+        color: #FFFFFF;
         text-decoration: none;
       }
 
@@ -52,6 +63,13 @@
             <a>Time:</a>
             <a id="Time"></a>
     </info>
+
+    <hh> <a> You are colorful playball</a></br>
+        <a>Eat balls whose radius is samller, increase your radius </a></br>
+        <a>Eat balls whose radius is bigger,  game over</a></br>
+        <a>AWSD to control direction of playball</a></br>
+        <a>Left/Right/Up/Down to control the view of camera</a></br>
+    </hh>
     <script src="js/three.min.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/SourceLoader.js"></script>
