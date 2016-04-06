@@ -135,9 +135,9 @@ scene.add(skyboxMesh);
 
 //score and time board
 var score=2;
-var seconds=29;
+var seconds=59;
 var second = 0;
-document.getElementById("Time").innerHTML = 30;
+document.getElementById("Time").innerHTML = 60;
 interval = setInterval(function() {
   document.getElementById("Time").innerHTML = seconds-second;
         if (second >= seconds) {
