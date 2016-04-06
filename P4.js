@@ -1,5 +1,6 @@
 // Luxi Xu, Wei Luo Project 4
 
+var stats;
 // var instruction="Here is the instruction of the BOB game:"+"\n"+
 //                  "You have a limited of 10 seconds, you are ranked by the score(depends on the radius of the colorful playball).\n"
 //                  +"You can only eat score balls whose radius is samller and playball become larger, otherwise, game over.\n"
@@ -10,6 +11,16 @@ THREE.Object3D.prototype.setMatrix = function(a) {
   this.matrix=a;
   this.matrix.decompose(this.position,this.quaternion,this.scale);
 }
+//FPS Window
+stats = new Stats();
+//stats.setMode( 0 ); // 0: fps, 1: ms, 2: mb
+
+// align top-left
+stats.domElement.style.position = 'absolute';
+//stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
+
+document.body.appendChild( stats.domElement );
 
 // Build a visual axis system
 function buildAxis( src, dst, colorHex, dashed ) {
@@ -574,17 +585,17 @@ keyboard.domElement.addEventListener('keydown',function(event){
 // SETUP UPDATE CALL-BACK
 // Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
-
           // //Camera rotation with 0.0001 adjusting speed
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
           
-
-            requestAnimationFrame(update);
             renderer.render(scene,camera);
             collision();
-  }
+            requestAnimationFrame(update);
+            stats.update();
 
+  }
+//requestAnimationFrame( update );
 keyboard.domElement.addEventListener('keydown', onKeyDown );
 update();
