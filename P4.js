@@ -163,7 +163,7 @@ var ballnumber = 50;
 
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
-  rad[r] = getRandomInt(0.5,3);
+  rad[r] = getRandomInt(2,5);
   geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
 
 }
@@ -220,8 +220,8 @@ var playballMatrix = multiplyHelper(positionMatrix,rotationMatrix);
 playball.setMatrix(playballMatrix);
 
 
-//camera as a child of playball
-var transMatrix = gettransMatrix(45,10,40);
+//camera as a child of playbal5
+var transMatrix = gettransMatrix(55,20,50);
 var cameraMatrix = multiplyHelper(playballMatrix, transMatrix);
 camera.applyMatrix(cameraMatrix);
 
