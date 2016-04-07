@@ -35,7 +35,7 @@ function buildAxis( src, dst, colorHex, dashed ) {
 
         geom.vertices.push( src.clone() );
         geom.vertices.push( dst.clone() );
-        geom.computeLineDistances(); // This one is SUPER important, otherwise dashed lines will appear as simple plain lines
+        geom.computeLineDistances(); 
 
         var axis = new THREE.Line( geom, mat, THREE.LinePieces );
 
@@ -44,6 +44,7 @@ function buildAxis( src, dst, colorHex, dashed ) {
 }
 
 var length = 100.0;
+var shootingrange = 50.0;
 // Build axis visuliaztion for debugging.
 var x_axis = buildAxis(
       new THREE.Vector3( 0, 0, 0 ),
@@ -66,6 +67,8 @@ var z_axis = buildAxis(
       0x0000FF,
       false
   )
+
+
 
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
@@ -117,7 +120,6 @@ var motion = {
 //var torsoMatrix = gettransMatrix(45/2,20/2,40/2);
 motion.position = new THREE.Vector3(45/2,20/2,40/2);
 
-
 // add background
 var urlPrefix = "images/";
 var urls = [ urlPrefix + "posx.jpg", urlPrefix + "negx.jpg",
@@ -139,7 +141,7 @@ var material = new THREE.ShaderMaterial({
 });
 
 // build the skybox Mesh 
-skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 500, 500, 500, 1, 1, 1, null, true ), material );
+skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 700, 700, 700, 1, 1, 1, null, true ), material );
 skyboxMesh.doubleSided = true;
 scene.add(skyboxMesh);
 
@@ -158,8 +160,6 @@ interval = setInterval(function() {
         second++;
     }, 1000);
 document.getElementById("Score").innerHTML = score;
-
-
 
 
 //add random balls
@@ -213,9 +213,9 @@ var groups = [];
 for(var r=0; r<ballnumber; r++){
   groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
   //keep the ball generated outside the scoreball
-  groups[r].position.x = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
-  groups[r].position.y = 0;
-  groups[r].position.z = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
+  groups[r].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
+  groups[r].position.y = -2+ rad[r];
+  groups[r].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
   scene.add( groups[r] );
 }
 
@@ -231,6 +231,21 @@ var playballMatrix = multiplyHelper(positionMatrix,rotationMatrix);
 playball.setMatrix(playballMatrix);
 
 
+//foot of the playball
+var foot = new THREE.SphereGeometry(1, 2, 1, 0, Math.PI * 2, 0, Math.PI / 2);
+var footmaterial = new THREE.MeshNormalMaterial();
+
+var leftfeet = new THREE.Mesh(foot, footmaterial);
+var rightfeet =  new THREE.Mesh(foot, footmaterial);
+leftfeet.parent=playball;
+rightfeet.parent=playball;
+leftfeet.applyMatrix(gettransMatrix(1.5,-2,0));
+leftfeet.rotation.y = Math.PI / 4;
+rightfeet.applyMatrix(gettransMatrix(0,-2,1.5));
+rightfeet.rotation.y = Math.PI / 4;
+// scene.add(leftfeet);
+// scene.add(rightfeet);
+
 //camera as a child of playbal5
 var transMatrix = gettransMatrix(55,20,50);
 var cameraMatrix = multiplyHelper(playballMatrix, transMatrix);
@@ -243,15 +258,29 @@ camera.lookAt(playball.position);
 motion.forward.subVectors(playball.position,camera.position);
 motion.forward.normalize();
 
+//add bullets
+var bulletnumber = 0;
+var bullets = [];
+var dirs = [];
+
+//adding the shooting line
+// var shoot_axis = buildAxis(
+//       new THREE.Vector3( playball.position.x, playball.position.y, playball.position.z ),
+//       new THREE.Vector3( motion.forward.x, 0, motion.forward.z ),
+//       //blue
+//       0x0000FF,
+//       false
+//   )
+// scene.add(shoot_axis);
+
 
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
 var velocity = 6;
+var rate = 1.1;
 
 function collision(){
-
-
     for (var r=0; r<ballnumber;r++){
           var xPlay = playball.position.x;
           var yPlay = playball.position.y;
@@ -264,6 +293,24 @@ function collision(){
         if (dis<=radDis){
           if (playballRad >= rad[r]){
             scene.remove(groups[r]);
+
+            rad.splice(r,1);
+            groups.splice(r,1);
+            ballnumber--;
+
+            var temp = playball.matrix;
+            playball.applyMatrix(gettransMatrix(-xPlay, -yPlay, -zPlay));
+            playball.applyMatrix(getscaleMatrix(rate,rate,rate));
+            playballRad*=rate;
+            playball.applyMatrix(gettransMatrix(xPlay, playballRad-2, zPlay));
+            playball.geometry.verticesNeedUpdate = true;
+
+            transMatrix = multiplyHelper(transMatrix, getscaleMatrix(0.8,0.8,0.8));
+
+            var cameratransMatrix = multiplyHelper(temp, transMatrix);
+            camera.setMatrix(cameratransMatrix);
+            camera.lookAt(playball.position);
+
             //playballgeometry.sphereGeometry(10,32,32);
             console.log("collision");
           }
@@ -274,6 +321,34 @@ function collision(){
       }
     }
 }
+
+
+function collisionbullet(obj){
+
+    for (var r=0; r<ballnumber;r++){
+          var xPlay = bullets[obj].position.x;
+          var yPlay = bullets[obj].position.y;
+          var zPlay = bullets[obj].position.z;
+        var xBall = groups[r].position.x;
+        var yBall = groups[r].position.y;
+        var zBall = groups[r].position.z;
+        dis=Math.sqrt((xPlay-xBall)*(xPlay-xBall)+(yPlay-yBall)*(yPlay-yBall)+(zPlay-zBall)*(zPlay-zBall));
+        radDis= playballRad+ rad[r];
+          if (dis <= rad[r]){
+            scene.remove(groups[r]);
+            rad.splice(r,1);
+            groups.splice(r,1);
+            ballnumber--;
+
+            //playballgeometry.sphereGeometry(10,32,32);
+            scene.remove(bullets[obj]);
+            bullets.splice(obj,1);
+            update();
+
+          }
+      }
+    }
+
 
 collision();
 
@@ -349,15 +424,18 @@ renderer.render(scene,camera);
  }
    else if (keyboard.eventMatches(event,"left")) {
 
-    playball.rotation.y-=0.25;
-   // var rotObjectMatrix = new THREE.Matrix4();
+playball.rotation.y+=0.10;
+    // var rotObjectMatrix = new THREE.Matrix4();
 
+    // var axis = new THREE.Vector3(0,1,0);
 
-   //  var axis = new THREE.Vector3(0,1,0);
-   //  rotObjectMatrix.makeRotationAxis(axis.normalize(), -1/10);
-   //  rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
-   //  playball.setMatrix(rotObjectMatrix);
-   //  playball.rotation.setFromRotationMatrix(playball.matrix);
+    // var axis = new THREE.Vector3(0,1,0);
+    // rotObjectMatrix.makeRotationAxis(axis.normalize(), +1/10);
+    // rotObjectMatrix=multiplyHelper(rotObjectMatrix, playball.matrix);
+    // playball.setMatrix(rotObjectMatrix);
+    // playball.rotation.setFromRotationMatrix(playball.matrix);
+
+    //playball.rotateOnAxis(axis,+1/10);
 
     var cameraRotMatrix = multiplyHelper(playball.matrix, transMatrix);
     camera.setMatrix(cameraRotMatrix);
@@ -371,7 +449,7 @@ renderer.render(scene,camera);
 
  }
     else if (keyboard.eventMatches(event,"right")) {
-    playball.rotation.y+=0.25;
+    playball.rotation.y-=0.10;
     // var rotObjectMatrix = new THREE.Matrix4();
 
     // var axis = new THREE.Vector3(0,1,0);
@@ -404,7 +482,7 @@ renderer.render(scene,camera);
       var axis = new THREE.Vector3();
 
       axis.crossVectors(ball2camera, camera.up).normalize();
-      playball.rotateOnAxis(axis, -0.25);
+      playball.rotateOnAxis(axis, -0.10);
       // var rotObjectMatrix = new THREE.Matrix4();
 
       // rotObjectMatrix.makeRotationAxis(axis, -1/10);
@@ -434,7 +512,7 @@ renderer.render(scene,camera);
             var axis = new THREE.Vector3();
 
       axis.crossVectors(ball2camera, camera.up).normalize();
-      playball.rotateOnAxis(axis, 0.25);
+      playball.rotateOnAxis(axis, 0.10);``
       // var rotObjectMatrix = new THREE.Matrix4();
 
       // rotObjectMatrix.makeRotationAxis(axis, +1/10);
@@ -452,6 +530,18 @@ renderer.render(scene,camera);
     motion.forward.y=0;
 
 
+ }
+  else if (keyboard.eventMatches(event,"space")){
+    motion.forward.subVectors(playball.position,camera.position);
+    motion.forward.normalize();
+    motion.forward.y=0;
+
+    camera.lookAt(playball.position);
+    console.log(playball.position);
+    if(bulletnumber<=3){
+    var obj = createBullet(new THREE.Vector3(playball.position.x, playball.position.y, playball.position.z), motion.forward);
+    bulletnumber++;
+    } 
  }
 }
 
@@ -500,6 +590,23 @@ var normalMaterial = new THREE.MeshNormalMaterial(  {color: 0xffaa00, wireframe:
 function makeCube() {
   var unitCube = new THREE.BoxGeometry(1,1,1);
   return unitCube;
+}
+
+function createBullet(pos,dir) {
+  var bulletMaterial = new THREE.MeshNormalMaterial();
+  var bulletgeometry = new THREE.SphereGeometry( 1, 2, 2 );
+  var bullet = new THREE.Mesh(bulletgeometry, bulletMaterial);
+  bullet.position.x = pos.x;
+  bullet.position.y = pos.y;
+  bullet.position.z = pos.z;
+  console.log(bullet.position);
+
+  bullet.geometry.dynamic=true;
+ 
+  bullets.push(bullet);
+  dirs.push(dir);
+  scene.add(bullet);
+  return bullet;
 }
 
 
@@ -589,9 +696,14 @@ function update() {
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
-          
-            renderer.render(scene,camera);
+          for(var b=0; b< bullets.length; b++){
+            collisionbullet(b);
+            if(bullets[b].position.x< 100 && bullets[b].position.z<100 && bullets[b]!=null){
+          bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
+        }
+      }
             collision();
+            renderer.render(scene,camera);
             requestAnimationFrame(update);
             stats.update();
 
