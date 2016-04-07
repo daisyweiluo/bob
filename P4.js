@@ -176,7 +176,8 @@ var ballnumber = 50;
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
   rad[r] = getRandomInt(0.5,3);
-  geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
+  //geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
+  geos[r] = new THREE.SphereGeometry(rad[r],32,32)
 
 }
 
@@ -209,13 +210,25 @@ new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading, vert
 new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true, transparent: true } )
 ];
 
+var scoreballPic=THREE.ImageUtils.loadTexture('scorePic.png');
+var scoreMaterial = new THREE.MeshBasicMaterial( {map:scoreballPic} );
+
+var scoreballBadPic=THREE.ImageUtils.loadTexture('scoreBadPic.png');
+var scoreBadMaterial = new THREE.MeshBasicMaterial( {map:scoreballBadPic} );
+
 //Add the balls to the scene
 var groups = [];
 var removed = [];
 for(var r=0; r<ballnumber; r++){
   removed[r]="No";
-  groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
+  //groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], scoreMaterial);
   //keep the ball generated outside the scoreball
+  if (rad[r]<=2.5){
+      groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
+  }
+  else {
+    groups[r]= new THREE.Mesh( geos[r], scoreBadMaterial );
+  }
   groups[r].position.x = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
   groups[r].position.y = 0;
   groups[r].position.z = 20+Math.random()*(Math.round(Math.random())*2-1)*100;
@@ -226,7 +239,7 @@ for(var r=0; r<ballnumber; r++){
 var normalMaterial = new THREE.MeshNormalMaterial();
 var playballgeometry = new THREE.SphereGeometry( 2.5, 32, 32 );
 playballgeometry.dynamic=true;
-playballRad=2;
+playballRad=2.5;
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
 var playballpositionMatrix = gettransMatrix(0,0,0);
 var rotationMatrix = getRotMatrix(0,"x");
@@ -270,7 +283,6 @@ function collision(){
             scene.remove(groups[r]);
             removed[r]="Yes";
             console.log("collision");
-            console.log(removed[r]);
           }
           else {
             alert("eat balls bigger, game over");
