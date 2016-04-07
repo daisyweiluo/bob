@@ -18,7 +18,8 @@ stats = new Stats();
 // align top-left
 stats.domElement.style.position = 'absolute';
 //stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
+stats.domElement.style.top = '10px';
+stats.domElement.style.left= '10px';
 
 document.body.appendChild( stats.domElement );
 
