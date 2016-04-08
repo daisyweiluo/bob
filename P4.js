@@ -74,8 +74,8 @@ var z_axis = buildAxis(
 // SETUP RENDERER & SCENE
 var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
-var renderer = new THREE.WebGLRenderer({ alpha: true } );
-renderer.setClearColor( 0x000000, 0 ); // the default
+var renderer = new THREE.WebGLRenderer({} );
+renderer.setClearColor( 0xFFB6C1, 0 ); // the default
 //renderer.setClearColor(0xFC9E55); // white background colour
 // var node = document.createElement("P");                 // Create a <li> node
 // var textnode = document.createTextNode("Score");         // Create a text node
@@ -139,47 +139,22 @@ var motion = {
 //var torsoMatrix = gettransMatrix(45/2,20/2,40/2);
 motion.position = new THREE.Vector3(45/2,20/2,40/2);
 
-// add background
-var urlPrefix = "images/";
-var urls = [ urlPrefix + "posx.jpg", urlPrefix + "negx.jpg",
-    urlPrefix + "posy.jpg", urlPrefix + "negy.jpg",
-    urlPrefix + "posz.jpg", urlPrefix + "negz.jpg" ];
-
-var textureCube = THREE.ImageUtils.loadTextureCube(urls);
-
-
-var shader = THREE.ShaderLib['cube'];
-var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
-uniforms['tCube'].value= textureCube; // textureCube has been init before
-var material = new THREE.ShaderMaterial({
-    fragmentShader    : shader.fragmentShader,
-    vertexShader  : shader.vertexShader,
-    uniforms  : uniforms,
-    depthWrite: false,
-    side: THREE.DoubleSide
-});
-
-// build the skybox Mesh 
-skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 500, 500, 500, 1, 1, 1, null, true ), material );
-skyboxMesh.doubleSided = true;
-scene.add(skyboxMesh);
-
 
 //score and time board
 var score=0;
-var seconds=19;
+var seconds=29;
 var second = 0;
-document.getElementById("Time").innerHTML = 20;
+document.getElementById("Time").innerHTML = 30;
 interval = setInterval(function() {
   document.getElementById("Time").innerHTML = seconds-second;
         if (second >= seconds) {
-        //alert("Game Over");
+             alert("No Time Left! You score is "+score);
+            location.reload();
         clearInterval(interval);
         }
         second++;
     }, 1000);
 document.getElementById("Score").innerHTML = score;
-
 
 //add random balls
 var color;
@@ -305,7 +280,8 @@ motion.forward.normalize();
 var bulletnumber = 0;
 var bullets = [];
 var dirs = [];
-
+var bulletleft=5-bulletnumber;
+document.getElementById("Bullet").innerHTML = bulletleft;
 //adding the shooting line
 // var shoot_axis = buildAxis(
 //       new THREE.Vector3( playball.position.x, playball.position.y, playball.position.z ),
@@ -357,10 +333,10 @@ function collision(){
 
             //playballgeometry.sphereGeometry(10,32,32);
             removed[r]="Yes";
-            console.log("collision");
+            //console.log("collision");
           }
           else {
-            alert("eat balls bigger, game over");
+            alert("eat balls bigger, game over! You score is "+score);
             location.reload();
           }
         }
@@ -392,6 +368,7 @@ function collisionbullet(obj){
             rad.splice(r,1);
             groups.splice(r,1);
             ballnumber--;
+            //document.getElementById("Bullet").innerHTML = 5;
 
             //playballgeometry.sphereGeometry(10,32,32);
             scene.remove(bullets[obj]);
@@ -594,9 +571,11 @@ playball.rotation.y+=0.10;
 
     camera.lookAt(playball.position);
     console.log(playball.position);
-    if(bulletnumber<=3){
+    if(bulletnumber<=5){
     var obj = createBullet(new THREE.Vector3(playball.position.x, playball.position.y, playball.position.z), motion.forward);
     bulletnumber++;
+    bulletleft=5-bulletnumber;
+    document.getElementById("Bullet").innerHTML = bulletleft;
     } 
  }
 }
