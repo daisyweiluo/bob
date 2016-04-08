@@ -149,9 +149,9 @@ scene.add(skyboxMesh);
 
 //score and time board
 var score=0;
-var seconds=59;
+var seconds=19;
 var second = 0;
-document.getElementById("Time").innerHTML = 60;
+document.getElementById("Time").innerHTML = 20;
 interval = setInterval(function() {
   document.getElementById("Time").innerHTML = seconds-second;
         if (second >= seconds) {
@@ -224,14 +224,15 @@ for(var r=0; r<ballnumber; r++){
   removed[r]="No";
   //groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], scoreMaterial);
   //keep the ball generated outside the scoreball
+  groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
 
-  if (rad[r]<=2){
-      groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
-  }
-  else {
-    //rad[r]=1000000;
-    groups[r]= new THREE.Mesh( geos[r], scoreBadMaterial );
-  }
+  // if (rad[r]<=3.5){
+  //     groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
+  // }
+  // else {
+  //   //rad[r]=1000000;
+  //   groups[r]= new THREE.Mesh( geos[r], scoreBadMaterial );
+  // }
   groups[r].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
   groups[r].position.y = 0;
   groups[r].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
@@ -240,9 +241,9 @@ for(var r=0; r<ballnumber; r++){
 
 //add play balls
 var normalMaterial = new THREE.MeshNormalMaterial();
-var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
+var playballgeometry = new THREE.SphereGeometry( 3.5, 32, 32 );
 playballgeometry.dynamic=true;
-playballRad=2;
+playballRad=3.5;
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
 var playballpositionMatrix = gettransMatrix(0,0,0);
 var rotationMatrix = getRotMatrix(0,"x");
@@ -730,7 +731,7 @@ function update() {
           // camera.position.z = Math.sin( timer ) * 70;
           for(var b=0; b< bullets.length; b++){
             collisionbullet(b);
-            if(Math.abs(bullets[b].position.x)< 50 && Math.abs(bullets[b].position.z)<50 && bullets[b]!=null){
+            if(Math.abs(bullets[b].position.x)< 100 && Math.abs(bullets[b].position.z)<100 && bullets[b]!=null){
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
