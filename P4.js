@@ -105,10 +105,10 @@ scene.add(z_axis);
 // scene.add(ground);
 
 /* Floor  */    
-var geometry = new THREE.PlaneGeometry( 5, 20, 32);
-var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-var plane = new THREE.Mesh( geometry, material );
-scene.add( plane );
+// var geometry = new THREE.PlaneGeometry( 5, 20, 32);
+// var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+// var plane = new THREE.Mesh( geometry, material );
+// scene.add( plane );
 
 // var floor = new THREE.Mesh( geometry, material );
 // floor.material.side = THREE.DoubleSide;
