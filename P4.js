@@ -85,7 +85,7 @@ canvas.appendChild(renderer.domElement);
 var textureCube;
 
 //SETUP MOUSE
-var mouse = {x:0, y:0};
+//var mouse = {x:0, y:0};
 
 // SETUP CAMERA
 /*player camera */
@@ -96,6 +96,12 @@ scene.add(camera);
 scene.add(x_axis);
 scene.add(y_axis);
 scene.add(z_axis);
+
+//Set up ray caster
+var mouse = new THREE.Vector2(), INTERSECTED;
+var raycaster = new THREE.Raycaster();
+//mouse
+document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
 //Set up ground
 // var groundGeometry = new THREE.PlaneGeometry(60, 60, 9, 9);
@@ -316,12 +322,20 @@ var dirs = [];
 //   )
 // scene.add(shoot_axis);
 
+//Listen to mouse
+function onDocumentMouseMove( event ) {
+        event.preventDefault();
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      }
+
+
 
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
 var velocity = 6;
-var rate = 1.1;
+var rate = 1.01;
 
 function collision(){
     for (var r=0; r<ballnumber;r++){
@@ -594,7 +608,7 @@ playball.rotation.y+=0.10;
 
     camera.lookAt(playball.position);
     console.log(playball.position);
-    if(bulletnumber<=3){
+    if(bulletnumber<=5){
     var obj = createBullet(new THREE.Vector3(playball.position.x, playball.position.y, playball.position.z), motion.forward);
     bulletnumber++;
     } 
@@ -632,7 +646,7 @@ for(i=-500;i<501;i+=2) {
 var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 grid_state=true;
-scene.add(grid);
+//scene.add(grid);
 
 // MATERIALS
 // Note: Feel free to be creative with this! 
@@ -746,22 +760,99 @@ keyboard.domElement.addEventListener('keydown',function(event){
 });
 
 // SETUP UPDATE CALL-BACK
-// Hint: It is useful to understand what is being updated here, the effect, and why.
 function update() {
           // //Camera rotation with 0.0001 adjusting speed
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
+
           for(var b=0; b< bullets.length; b++){
             collisionbullet(b);
-            if(bullets[b].position>100 | Math.abs(bullets[b].position.z)>100){
-            scene.remove(bullets[obj]);
-            bullets.splice(obj,1);
+            if(Math.abs(bullets[b].position.x)>100 | Math.abs(bullets[b].position.z)>100){
+            scene.remove(bullets[b]);
+            bullets.splice(b,1);
             }else{
-
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
+
+      //find intersection
+        raycaster.setFromCamera( mouse, camera );
+        // if ( intersects.length > 0 ) {
+        //   if ( INTERSECTED != intersects[ 0 ].object ) {
+        //     if ( INTERSECTED ){
+        //       console.log(1);
+        //     var material = INTERSECTED.material;
+
+        //     if(material.emissive){
+        //         material.emissive.setHex(INTERSECTED.currentHex);
+        //         INTERSECTED = intersects[ 0 ].object;
+        //         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+        //         material.emissive.setHex( 0xff0000 );
+        //     }
+        //     else
+        //     {
+        //         material.color.setHex(INTERSECTED.currentHex);
+        //         INTERSECTED = intersects[ 0 ].object;
+        //         INTERSECTED.currentHex = material.color.getHex();
+        //         material.color.setHex( 0xff0000 );
+
+        //     } 
+              
+        //   }else{
+        //                   console.log(2);
+
+        //     INTERSECTED = intersects[ 0 ].object;
+        //     var material = INTERSECTED.material;
+
+        //     if(material.emissive){
+        //       INTERSECTED.currentHex = material.emissive.getHex();
+        //       material.emissive.setHex( 0xff0000);
+        //     }
+        //     else
+        //     { 
+        //         INTERSECTED.currentHex = material.color.getHex();
+        //         material.color.setHex( 0xff0000);
+        //     } 
+
+        //   }
+
+        //   }
+        // } else {
+        //   if ( INTERSECTED ) 
+        //     var material = INTERSECTED.material;
+          
+        //     if(material.emissive){
+        //         material.emissive.setHex(INTERSECTED.currentHex);
+        //     }
+        //     else
+        //     {
+        //         material.color.setHex(INTERSECTED.currentHex);
+        //     } 
+        //   INTERSECTED = null;
+        // }
+
+        var intersects = raycaster.intersectObjects( groups );
+        if ( intersects.length > 0 ) {
+          if ( INTERSECTED != intersects[ 0 ].object ) {
+            if ( INTERSECTED ){INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+
+            scene.remove(INTERSECTED);
+            rad.splice(r,1);
+            groups.splice(r,1);
+            ballnumber--;}
+
+            INTERSECTED = intersects[ 0 ].object;
+            INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+            INTERSECTED.material.color.setHex( 0xff0000 );
+          
+          }
+        } else {
+          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+          console.log(3);
+          INTERSECTED = null;
+        }
+
             collision();
             renderer.render(scene,camera);
             requestAnimationFrame(update);
