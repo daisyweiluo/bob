@@ -78,7 +78,7 @@ var z_axis = buildAxis(
 var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({} );
-renderer.setClearColor( 0xFFB6C1, 0 ); // the default
+renderer.setClearColor( 0x000000, 0 ); // the default
 //renderer.setClearColor(0xFC9E55); // white background colour
 // var node = document.createElement("P");                 // Create a <li> node
 // var textnode = document.createTextNode("Score");         // Create a text node
@@ -108,9 +108,11 @@ scene.add(z_axis);
 //Set up ray caster
 var mouse = new THREE.Vector2(), INTERSECTED;
 var raycaster = new THREE.Raycaster();
+
 var mouse = new THREE.Vector2(),
 offset = new THREE.Vector3(),
 INTERSECTED, SELECTED;
+
 
 //mouse
 // document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -257,9 +259,9 @@ for(var r=0; r<ballnumber; r++){
   groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
 
 
-  groups[r].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
+  groups[r].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   groups[r].position.y = -2+ rad[r];
-  groups[r].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
+  groups[r].position.z = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   scene.add( groups[r] );
 }
 
@@ -277,9 +279,9 @@ var boxMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, ver
 var boxgroups = [];
 for(var i=0; i<boxnumber; i++){
   boxgroups[i]= new THREE.Mesh( boxes[i], boxMaterial );
-  boxgroups[i].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
+  boxgroups[i].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   boxgroups[i].position.y = -2+ len[i];
-  boxgroups[i].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
+  boxgroups[i].position.z = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   scene.add( boxgroups[i] );
 }
 
@@ -287,13 +289,74 @@ for(var i=0; i<boxnumber; i++){
 
 //add play balls
 var playPic=THREE.ImageUtils.loadTexture('playPic.png');
-var playMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:playPic} );
+//var shader = sobelShader;
+
+// LOAD SHADERS
+var shaderFiles = [
+  'glsl/playball.vs.glsl',
+  'glsl/playball.fs.glsl',
+  'glsl/playball2.vs.glsl',
+  'glsl/playball2.fs.glsl',
+];
+
+new THREE.SourceLoader().load(shaderFiles, function(shaders) {
+   // playMaterial.vertexShader = shaders['glsl/playball.vs.glsl'];
+   // playMaterial.fragmentShader = shaders['glsl/playball.fs.glsl'];
+
+   playMaterial.vertexShader = shaders['glsl/playball2.vs.glsl'];
+   playMaterial.fragmentShader = shaders['glsl/playball2.fs.glsl'];
+
+  playMaterial.needsUpdate = true;
+
+});
+
+// LIGHTING UNIFORMS
+ var lightColor = new THREE.Color(1.0,1.0,1.0);
+var ambientColor = new THREE.Color(0.4,0.4,0.4);
+// var lightPosition = new THREE.Vector3(70,100,70);
+
+// var litColor = new THREE.Color(0.3,0.4,0.6);
+// var unLitColor = new THREE.Color(1.0,1.0,1.0);
+// var outlineColor = new THREE.Color(0.04,0.1,0.15);
+
+// var litArmadilloColor = new THREE.Color(0.15,0.6,0.3);
+// var unLitArmadilloColor = new THREE.Color(0.04,0.3,0.15);
+
+ var kAmbient = 0.5;
+// var kDiffuse = 0.8;
+// var kSpecular = 0.8;
+// var shininess = 10.0;
+
+//Texture
+var playballtexture = new THREE.Texture({map:playPic});
+
+//var playMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:playPic} );
+var playMaterial = new THREE.ShaderMaterial({
+uniforms: {
+            time: { type: "f", value: 0 },
+            texture: { type: "t", value: THREE.ImageUtils.loadTexture('./playPic.png') },
+             width: {type: 'f',value: 320.0},
+             height: {type: 'f',value: 240.0},
+             color : {type : 'c' , value:lightColor},
+             cameraPos: {type : 'v3', value: camera.position},
+
+     //lightColor : {type : 'c', value: litArmadilloColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     // lightPosition : {type: 'v3', value: lightPosition},
+     // litArmadilloColor: {type : 'c', value: litArmadilloColor},
+     // unlitArmadilloColor: {type : 'c', value: unLitArmadilloColor},
+      Ka : {type : 'f', value: kAmbient},
+     // Kd : {type : 'f', value: kDiffuse},
+     // Ks : {type : 'f', value: kSpecular},
+     // N : {type : 'f', value: shininess},
+   },
+    });
 
 var playballgeometry = new THREE.SphereGeometry( 3.5, 32, 32 );
 playballgeometry.dynamic=true;
 playballRad=3.5;
 var playball = new THREE.Mesh( playballgeometry, playMaterial );
-var playballpositionMatrix = gettransMatrix(0,0,0);
+var playballpositionMatrix = gettransMatrix(0,-2+playballRad,0);
 var rotationMatrix = getRotMatrix(0,"x");
 var playballMatrix = multiplyHelper(playballpositionMatrix,rotationMatrix);
 playball.setMatrix(playballMatrix);
@@ -418,7 +481,7 @@ function onDocumentMouseUp( event ) {
 var keyboard = new THREEx.KeyboardState();
 var keystep = 10;
 var velocity = 6;
-var rate = 1.01;
+var rate = 1.04;
 
 function collision(){
     for (var r=0; r<ballnumber;r++){
@@ -510,7 +573,6 @@ function collisionbullet(obj){
             //playballgeometry.sphereGeometry(10,32,32);
             scene.remove(bullets[obj]);
             bullets.splice(obj,1);
-            update();
 
           }
       }
@@ -567,7 +629,6 @@ var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
 
 camera.lookAt(playball.position);
-
 
 motion.forward.subVectors(playball.position,camera.position);
 motion.forward.normalize();
@@ -738,17 +799,17 @@ window.onscroll = function () {
 var gridGeometry = new THREE.Geometry();
 var i;
 
-for(i=-500;i<501;i+=2) {
-  gridGeometry.vertices.push( new THREE.Vector3(i,-2,-500));
-  gridGeometry.vertices.push( new THREE.Vector3(i,-2,500));
-  gridGeometry.vertices.push( new THREE.Vector3(-500,-2,i));
-  gridGeometry.vertices.push( new THREE.Vector3(500,-2,i));
+for(i=-150;i<151;i+=2) {
+  gridGeometry.vertices.push( new THREE.Vector3(i,-2,-150));
+  gridGeometry.vertices.push( new THREE.Vector3(i,-2,150));
+  gridGeometry.vertices.push( new THREE.Vector3(-150,-2,i));
+  gridGeometry.vertices.push( new THREE.Vector3(150,-2,i));
 }
 
 var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 grid_state=true;
-//scene.add(grid);
+scene.add(grid);
 
 // MATERIALS
 // Note: Feel free to be creative with this! 
@@ -861,22 +922,54 @@ keyboard.domElement.addEventListener('keydown',function(event){
 
 });
 
+
+var clock = new THREE.Clock(true);
+
 // SETUP UPDATE CALL-BACK
 function update() {
           // //Camera rotation with 0.0001 adjusting speed
           // var timer = 0.0001 * Date.now();
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
+          var delta = clock.getDelta();
+          playMaterial.uniforms.time.value += delta * 10;
 
           for(var b=0; b< bullets.length; b++){
             collisionbullet(b);
             if(Math.abs(bullets[b].position.x)>100 | Math.abs(bullets[b].position.z)>100){
             scene.remove(bullets[b]);
             bullets.splice(b,1);
+            b--;
             }else{
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
+<<<<<<< HEAD
+=======
+
+
+
+        // var intersects = raycaster.intersectObjects( groups );
+        // if ( intersects.length > 0 ) {
+        //   if ( INTERSECTED != intersects[ 0 ].object ) {
+        //     if ( INTERSECTED ){INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+        //     scene.remove(INTERSECTED);
+        //     rad.splice(r,1);
+        //     groups.splice(r,1);
+        //     ballnumber--;}
+
+        //     INTERSECTED = intersects[ 0 ].object;
+        //     INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+        //     INTERSECTED.material.color.setHex( 0xff0000 );
+          
+        //   }
+        // } else {
+        //   if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+        //   console.log(3);
+        //   INTERSECTED = null;
+        // }
+
+>>>>>>> e54ec79ba574f589e1ef9507396b3a689f066200
             collision();
             renderer.render(scene,camera);
             requestAnimationFrame(update);
