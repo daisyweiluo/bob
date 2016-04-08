@@ -78,7 +78,7 @@ var z_axis = buildAxis(
 var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({} );
-renderer.setClearColor( 0xFFB6C1, 0 ); // the default
+renderer.setClearColor( 0x000000, 0 ); // the default
 //renderer.setClearColor(0xFC9E55); // white background colour
 // var node = document.createElement("P");                 // Create a <li> node
 // var textnode = document.createTextNode("Score");         // Create a text node
@@ -104,8 +104,17 @@ scene.add(z_axis);
 var mouse = new THREE.Vector2(), INTERSECTED;
 var raycaster = new THREE.Raycaster();
 
+var mouse = new THREE.Vector2(),
+offset = new THREE.Vector3(),
+INTERSECTED, SELECTED;
+
+
 //mouse
-document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+// document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+// window.addEventListener( 'mousedown', onMouseDown, false);
+renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
 //Set up ground
 // var groundGeometry = new THREE.PlaneGeometry(60, 60, 9, 9);
@@ -149,6 +158,16 @@ var motion = {
 //var torsoMatrix = gettransMatrix(45/2,20/2,40/2);
 motion.position = new THREE.Vector3(45/2,20/2,40/2);
 
+
+//add plane
+var plane;
+plane = new THREE.Mesh(
+         new THREE.PlaneBufferGeometry( 2000, 2000, 8, 8 ),
+         new THREE.MeshBasicMaterial( {visible:false} )
+        );
+var torsoMatrix = getscaleMatrix(1,1,1);
+console.log(plane);
+scene.add( plane );
 
 //score and time board
 var score=0;
@@ -382,12 +401,75 @@ document.getElementById("Bullet").innerHTML = bulletleft;
 // scene.add(shoot_axis);
 
 //Listen to mouse
+// function onDocumentMouseMove( event ) {
+//         event.preventDefault();
+//         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+//         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+//       }
+
+
 function onDocumentMouseMove( event ) {
-        event.preventDefault();
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    event.preventDefault();
+
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    raycaster.setFromCamera( mouse, camera );
+
+    if ( SELECTED ) {
+
+      var intersects = raycaster.intersectObject( plane );
+
+        if ( intersects.length > 0 ) {
+            SELECTED.position.copy( intersects[ 0 ].point.sub( offset ) );
+          }             
+          return;
+        }
+
+        var intersects = raycaster.intersectObjects( groups );
+        if ( intersects.length > 0 ) {
+          if ( INTERSECTED != intersects[ 0 ].object ) {
+            if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+            INTERSECTED = intersects[ 0 ].object;
+            INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+             plane.position.copy( INTERSECTED.position );
+             plane.lookAt( camera.position );
+          }
+
+          document.body.style.cursor= 'pointer';
+        } else {
+          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+          INTERSECTED = null;
+           document.body.style.cursor = 'auto';
+        }
       }
 
+
+  function onDocumentMouseDown( event ) {
+        event.preventDefault();
+        raycaster.setFromCamera( mouse, camera );
+        var intersects = raycaster.intersectObjects( groups );
+        if ( intersects.length > 0 ) {
+          //controls.enabled = false;
+          SELECTED = intersects[ 0 ].object;
+          var intersects = raycaster.intersectObject( plane );
+          if ( intersects.length > 0 ) {
+            offset.copy( intersects[ 0 ].point ).sub( plane.position );
+          }
+          document.body.style.cursor = 'move';
+        }
+    }
+
+
+function onDocumentMouseUp( event ) {
+        event.preventDefault();
+        //controls.enabled = true;
+        if ( INTERSECTED ) {
+          plane.position.copy( INTERSECTED.position );
+          SELECTED = null;
+        }
+        document.body.cursor = 'auto';
+}
 
 
 // LISTEN TO KEYBOARD
@@ -568,7 +650,7 @@ renderer.render(scene,camera);
  }
    else if (keyboard.eventMatches(event,"left")) {
 
-playball.rotation.y+=0.10;
+    playball.rotation.y+=0.10;
     // var rotObjectMatrix = new THREE.Matrix4();
 
     // var axis = new THREE.Vector3(0,1,0);
@@ -858,88 +940,27 @@ function update() {
         }
       }
 
-      //find intersection
-        raycaster.setFromCamera( mouse, camera );
+
+
+        // var intersects = raycaster.intersectObjects( groups );
         // if ( intersects.length > 0 ) {
         //   if ( INTERSECTED != intersects[ 0 ].object ) {
-        //     if ( INTERSECTED ){
-        //       console.log(1);
-        //     var material = INTERSECTED.material;
-
-        //     if(material.emissive){
-        //         material.emissive.setHex(INTERSECTED.currentHex);
-        //         INTERSECTED = intersects[ 0 ].object;
-        //         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-        //         material.emissive.setHex( 0xff0000 );
-        //     }
-        //     else
-        //     {
-        //         material.color.setHex(INTERSECTED.currentHex);
-        //         INTERSECTED = intersects[ 0 ].object;
-        //         INTERSECTED.currentHex = material.color.getHex();
-        //         material.color.setHex( 0xff0000 );
-
-        //     } 
-              
-        //   }else{
-        //                   console.log(2);
+        //     if ( INTERSECTED ){INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+        //     scene.remove(INTERSECTED);
+        //     rad.splice(r,1);
+        //     groups.splice(r,1);
+        //     ballnumber--;}
 
         //     INTERSECTED = intersects[ 0 ].object;
-        //     var material = INTERSECTED.material;
-
-        //     if(material.emissive){
-        //       INTERSECTED.currentHex = material.emissive.getHex();
-        //       material.emissive.setHex( 0xff0000);
-        //     }
-        //     else
-        //     { 
-        //         INTERSECTED.currentHex = material.color.getHex();
-        //         material.color.setHex( 0xff0000);
-        //     } 
-
-        //   }
-
+        //     INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+        //     INTERSECTED.material.color.setHex( 0xff0000 );
+          
         //   }
         // } else {
-        //   if ( INTERSECTED ) 
-        //     var material = INTERSECTED.material;
-          
-        //     if(material.emissive){
-        //         material.emissive.setHex(INTERSECTED.currentHex);
-        //     }
-        //     else
-        //     {
-        //         material.color.setHex(INTERSECTED.currentHex);
-        //     } 
+        //   if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+        //   console.log(3);
         //   INTERSECTED = null;
         // }
-
-        var intersects = raycaster.intersectObjects( groups );
-        if ( intersects.length > 0 ) {
-          if ( INTERSECTED != intersects[ 0 ].object ) {
-            if ( INTERSECTED ){INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-
-            scene.remove(INTERSECTED);
-
-            for(var i = 0; i < groups.length; i++) {
-            if(INTERSECTED == groups[i]){
-              rad.splice(i,1);
-              groups.splice(i, 1);
-              ballnumber--;
-              }
-              }
-            }
-
-            INTERSECTED = intersects[ 0 ].object;
-            INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-            INTERSECTED.material.color.setHex( 0xff0000 );
-          
-          }
-        } else {
-          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-          console.log(3);
-          INTERSECTED = null;
-        }
 
             collision();
             renderer.render(scene,camera);
