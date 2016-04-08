@@ -97,6 +97,24 @@ scene.add(x_axis);
 scene.add(y_axis);
 scene.add(z_axis);
 
+//Set up ground
+// var groundGeometry = new THREE.PlaneGeometry(60, 60, 9, 9);
+// var groundmaterial = new THREE.MeshLambertMaterial();
+// var ground = new THREE.Mesh(groundGeometry, groundmaterial);
+// ground.rotation.z+=Math.PI;
+// scene.add(ground);
+
+/* Floor  */    
+var geometry = new THREE.PlaneGeometry( 5, 20, 32);
+var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+var plane = new THREE.Mesh( geometry, material );
+scene.add( plane );
+
+// var floor = new THREE.Mesh( geometry, material );
+// floor.material.side = THREE.DoubleSide;
+// floor.rotation.x = de2ra(90);
+// scene.add( floor );
+
 // SETUP ORBIT CONTROLS OF THE CAMERA
 // click on it, able to change its camera
 //var controls = new THREE.OrbitControls(camera);
@@ -142,7 +160,7 @@ var material = new THREE.ShaderMaterial({
 });
 
 // build the skybox Mesh 
-skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 700, 700, 700, 1, 1, 1, null, true ), material );
+skyboxMesh = new THREE.Mesh( new THREE.BoxGeometry( 500, 500, 500, 1, 1, 1, null, true ), material );
 skyboxMesh.doubleSided = true;
 scene.add(skyboxMesh);
 
@@ -171,11 +189,12 @@ var faceIndices = [ 'a', 'b', 'c' ];
 var rad = [];
 var faces = [];
 var geos =[];
+//0=eatable, 1=bad, 2=portion
+var type = [];
 var ballnumber = 50;
 
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
-
   rad[r] = getRandomInt(2,5);
   //geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
   geos[r] = new THREE.SphereGeometry(rad[r],32,32)
@@ -212,10 +231,14 @@ new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wire
 ];
 
 var scoreballPic=THREE.ImageUtils.loadTexture('scorePic.png');
-var scoreMaterial = new THREE.MeshBasicMaterial( {map:scoreballPic} );
+//var scoreMaterial = new THREE.MeshBasicMaterial( { map:scoreballPic} );
+
+var scoreMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:scoreballPic} );
 
 var scoreballBadPic=THREE.ImageUtils.loadTexture('scoreBadPic.png');
+//var scoreBadMaterial = new THREE.MeshBasicMaterial( {map:scoreballBadPic} );
 var scoreBadMaterial = new THREE.MeshBasicMaterial( {map:scoreballBadPic} );
+
 
 //Add the balls to the scene
 var groups = [];
@@ -233,7 +256,7 @@ for(var r=0; r<ballnumber; r++){
     groups[r]= new THREE.Mesh( geos[r], scoreBadMaterial );
   }
   groups[r].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
-  groups[r].position.y = 0;
+  groups[r].position.y = -2+ rad[r];
   groups[r].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
   scene.add( groups[r] );
 }
@@ -544,7 +567,7 @@ playball.rotation.y+=0.10;
             var axis = new THREE.Vector3();
 
       axis.crossVectors(ball2camera, camera.up).normalize();
-      playball.rotateOnAxis(axis, 0.10);``
+      playball.rotateOnAxis(axis, 0.10);
       // var rotObjectMatrix = new THREE.Matrix4();
 
       // rotObjectMatrix.makeRotationAxis(axis, +1/10);
@@ -730,7 +753,10 @@ function update() {
           // camera.position.z = Math.sin( timer ) * 70;
           for(var b=0; b< bullets.length; b++){
             collisionbullet(b);
-            if(Math.abs(bullets[b].position.x)< 50 && Math.abs(bullets[b].position.z)<50 && bullets[b]!=null){
+            if(bullets[b].position>100 | Math.abs(bullets[b].position.z)>100){
+            scene.remove(bullets[obj]);
+            bullets.splice(obj,1);
+            }else{
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
