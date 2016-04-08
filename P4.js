@@ -18,7 +18,8 @@ stats = new Stats();
 // align top-left
 stats.domElement.style.position = 'absolute';
 //stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
+stats.domElement.style.top = '10px';
+stats.domElement.style.left= '10px';
 
 document.body.appendChild( stats.domElement );
 
@@ -147,7 +148,7 @@ scene.add(skyboxMesh);
 
 
 //score and time board
-var score=2;
+var score=0;
 var seconds=59;
 var second = 0;
 document.getElementById("Time").innerHTML = 60;
@@ -174,8 +175,10 @@ var ballnumber = 50;
 
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
+
   rad[r] = getRandomInt(2,5);
-  geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
+  //geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
+  geos[r] = new THREE.SphereGeometry(rad[r],32,32)
 
 }
 
@@ -208,13 +211,29 @@ new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading, vert
 new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true, transparent: true } )
 ];
 
+var scoreballPic=THREE.ImageUtils.loadTexture('scorePic.png');
+var scoreMaterial = new THREE.MeshBasicMaterial( {map:scoreballPic} );
+
+var scoreballBadPic=THREE.ImageUtils.loadTexture('scoreBadPic.png');
+var scoreBadMaterial = new THREE.MeshBasicMaterial( {map:scoreballBadPic} );
+
 //Add the balls to the scene
 var groups = [];
+var removed = [];
 for(var r=0; r<ballnumber; r++){
-  groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], materials );
+  removed[r]="No";
+  //groups[r] = THREE.SceneUtils.createMultiMaterialObject( geos[r], scoreMaterial);
   //keep the ball generated outside the scoreball
+
+  if (rad[r]<=2){
+      groups[r]= new THREE.Mesh( geos[r], scoreMaterial );
+  }
+  else {
+    //rad[r]=1000000;
+    groups[r]= new THREE.Mesh( geos[r], scoreBadMaterial );
+  }
   groups[r].position.x = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
-  groups[r].position.y = -2+ rad[r];
+  groups[r].position.y = 0;
   groups[r].position.z = 30+Math.random()*(Math.round(Math.random())*2-1)*100;
   scene.add( groups[r] );
 }
@@ -225,9 +244,9 @@ var playballgeometry = new THREE.SphereGeometry( 2, 32, 32 );
 playballgeometry.dynamic=true;
 playballRad=2;
 var playball = new THREE.Mesh( playballgeometry, normalMaterial );
-var positionMatrix = gettransMatrix(0,0,0);
+var playballpositionMatrix = gettransMatrix(0,0,0);
 var rotationMatrix = getRotMatrix(0,"x");
-var playballMatrix = multiplyHelper(positionMatrix,rotationMatrix);
+var playballMatrix = multiplyHelper(playballpositionMatrix,rotationMatrix);
 playball.setMatrix(playballMatrix);
 
 
@@ -288,6 +307,7 @@ function collision(){
         var xBall = groups[r].position.x;
         var yBall = groups[r].position.y;
         var zBall = groups[r].position.z;
+
         dis=Math.sqrt((xPlay-xBall)*(xPlay-xBall)+(yPlay-yBall)*(yPlay-yBall)+(zPlay-zBall)*(zPlay-zBall));
         radDis= playballRad+ rad[r];
         if (dis<=radDis){
@@ -312,15 +332,24 @@ function collision(){
             camera.lookAt(playball.position);
 
             //playballgeometry.sphereGeometry(10,32,32);
+            removed[r]="Yes";
             console.log("collision");
           }
           else {
             alert("eat balls bigger, game over");
             location.reload();
           }
+        }
+      }         
+       score=0;
+      for (var i=0;i<ballnumber;i++){
+          if (removed[i]==="Yes"){
+            score+=rad[i]*10;
+          }
       }
+      document.getElementById("Score").innerHTML = score;
+
     }
-}
 
 
 function collisionbullet(obj){
@@ -362,8 +391,10 @@ function onKeyDown(event)
   }
 
  else if (keyboard.eventMatches(event,"w")){
-  playball.applyMatrix(gettransMatrix(motion.forward.x*velocity,0, motion.forward.z*velocity));
-
+  newtransw=gettransMatrix(motion.forward.x*velocity,0, motion.forward.z*velocity);
+  playball.applyMatrix(newtransw);
+  playballpositionMatrix=multiplyHelper(playballpositionMatrix,newtransw);
+//  console.log(playballpositionMatrix);
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
 camera.lookAt(playball.position);
@@ -373,9 +404,9 @@ renderer.render(scene,camera);
  }   
 
  else if (keyboard.eventMatches(event,"s")){
-    //collision();
-  playball.applyMatrix(gettransMatrix(-motion.forward.x*velocity,0, -motion.forward.z*velocity));
-
+    newtranss=gettransMatrix(-motion.forward.x*velocity,0, -motion.forward.z*velocity);
+  playball.applyMatrix(newtranss);
+ playballpositionMatrix=multiplyHelper(playballpositionMatrix,newtranss);
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
 camera.lookAt(playball.position);
@@ -384,14 +415,14 @@ renderer.render(scene,camera);
  }
 
  else if (keyboard.eventMatches(event,"a")) {
-  //collision();
   var axis =  new THREE.Vector3(0,-1,0);
 
   var leftdirection = new THREE.Vector3();
 
   leftdirection.crossVectors(motion.forward, axis).normalize();
-
-  playball.applyMatrix(gettransMatrix(leftdirection.x*velocity,0, leftdirection.z*velocity));
+  newtransa=gettransMatrix(leftdirection.x*velocity,0, leftdirection.z*velocity);
+  playball.applyMatrix(newtransa);
+  playballpositionMatrix=multiplyHelper(playballpositionMatrix,newtransa);
 
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 
@@ -411,8 +442,9 @@ renderer.render(scene,camera);
   var axis =  new THREE.Vector3(0,1,0);
   var rightdirection = new THREE.Vector3();
   rightdirection.crossVectors(motion.forward, axis).normalize();
-  playball.applyMatrix(gettransMatrix(rightdirection.x,0, rightdirection.z));
-
+  newtransd=gettransMatrix(rightdirection.x,0, rightdirection.z);
+  playball.applyMatrix(newtransd);
+  playballpositionMatrix=multiplyHelper(playballpositionMatrix,newtransd);
 var cameratransMatrix = multiplyHelper(playball.matrix, transMatrix);
 camera.setMatrix(cameratransMatrix);
 camera.lookAt(playball.position);
@@ -698,7 +730,7 @@ function update() {
           // camera.position.z = Math.sin( timer ) * 70;
           for(var b=0; b< bullets.length; b++){
             collisionbullet(b);
-            if(bullets[b].position.x< 100 && bullets[b].position.z<100 && bullets[b]!=null){
+            if(Math.abs(bullets[b].position.x)< 50 && Math.abs(bullets[b].position.z)<50 && bullets[b]!=null){
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
