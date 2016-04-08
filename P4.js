@@ -1,8 +1,10 @@
 // Luxi Xu, Wei Luo Project 4
 
 var stats;
-var instruction="You are smily face playball\n"+"Eat balls with smaller radius, your radius get bigger\n"
+var instruction="You are smily face playball\n"
+        +"Eat balls with smaller radius, your radius get bigger\n"
         +"Eat balls with bigger radius,  game over\n"
+        +"Drag balls to change it position\n"
         +"Eat wooden boxes, game over\n"
         +"AWSD to control direction of playball\n"
         +"Left/Right/Up/Down to control the view of camera\n"
@@ -92,7 +94,8 @@ groundGeo = new THREE.BoxGeometry(5,0.1,5);
 var normalMaterial = new THREE.MeshNormalMaterial();
 ground = new THREE.Mesh( groundGeo, normalMaterial);
 var groundMatrix = getscaleMatrix(200,0.1,200);
-ground.applyMatrix(groundMatrix)
+ground.applyMatrix(groundMatrix);
+ground.position.y = -2;
 scene.add(ground);
 
 // SETUP CAMERA
@@ -121,30 +124,6 @@ renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
 renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
-//Set up ground
-// var groundGeometry = new THREE.PlaneGeometry(60, 60, 9, 9);
-// var groundmaterial = new THREE.MeshLambertMaterial();
-// var ground = new THREE.Mesh(groundGeometry, groundmaterial);
-// ground.rotation.z+=Math.PI;
-// scene.add(ground);
-
-/* Floor  */    
-// var geometry = new THREE.PlaneGeometry( 5, 20, 32);
-// var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-// var plane = new THREE.Mesh( geometry, material );
-// scene.add( plane );
-
-// var floor = new THREE.Mesh( geometry, material );
-// floor.material.side = THREE.DoubleSide;
-// floor.rotation.x = de2ra(90);
-// scene.add( floor );
-
-// SETUP ORBIT CONTROLS OF THE CAMERA
-// click on it, able to change its camera
-//var controls = new THREE.OrbitControls(camera);
-// controls.movementSpeed = 50;
-// controls.noFly= true;
-// controls.lookVertical=false;
 
 
 //Added Light
@@ -280,8 +259,8 @@ var boxgroups = [];
 for(var i=0; i<boxnumber; i++){
   boxgroups[i]= new THREE.Mesh( boxes[i], boxMaterial );
   boxgroups[i].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
-  boxgroups[i].position.y = -2+ len[i];
-  boxgroups[i].position.z = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
+  boxgroups[i].position.y = -2+ rad[r];
+  boxgroups[i].position.z =(Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   scene.add( boxgroups[i] );
 }
 
@@ -944,32 +923,6 @@ function update() {
           bullets[b].applyMatrix(gettransMatrix(dirs[b].x,dirs[b].y,dirs[b].z));
         }
       }
-<<<<<<< HEAD
-=======
-
-
-
-        // var intersects = raycaster.intersectObjects( groups );
-        // if ( intersects.length > 0 ) {
-        //   if ( INTERSECTED != intersects[ 0 ].object ) {
-        //     if ( INTERSECTED ){INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-        //     scene.remove(INTERSECTED);
-        //     rad.splice(r,1);
-        //     groups.splice(r,1);
-        //     ballnumber--;}
-
-        //     INTERSECTED = intersects[ 0 ].object;
-        //     INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-        //     INTERSECTED.material.color.setHex( 0xff0000 );
-          
-        //   }
-        // } else {
-        //   if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-        //   console.log(3);
-        //   INTERSECTED = null;
-        // }
-
->>>>>>> e54ec79ba574f589e1ef9507396b3a689f066200
             collision();
             renderer.render(scene,camera);
             requestAnimationFrame(update);
