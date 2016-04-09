@@ -46,7 +46,6 @@ function buildAxis( src, dst, colorHex, dashed ) {
         var axis = new THREE.Line( geom, mat, THREE.LinePieces );
 
         return axis;
-
 }
 
 var length = 100.0;
@@ -89,11 +88,14 @@ renderer.setClearColor( 0x000000, 0 ); // the default
 canvas.appendChild(renderer.domElement);
 var textureCube;
 
+
 //SET UP for plane
+var gPic=THREE.ImageUtils.loadTexture('ground.jpg');
+var gMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:gPic} );
 groundGeo = new THREE.BoxGeometry(5,0.1,5);
-var normalMaterial = new THREE.MeshNormalMaterial();
-ground = new THREE.Mesh( groundGeo, normalMaterial);
-var groundMatrix = getscaleMatrix(200,0.1,200);
+//var normalMaterial = new THREE.MeshNormalMaterial();
+ground = new THREE.Mesh( groundGeo, gMaterial);
+var groundMatrix = getscaleMatrix(50,0.1,50);
 ground.applyMatrix(groundMatrix);
 ground.position.y = -2;
 scene.add(ground);
@@ -788,7 +790,7 @@ for(i=-150;i<151;i+=2) {
 var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 grid_state=true;
-scene.add(grid);
+//scene.add(grid);
 
 // MATERIALS
 // Note: Feel free to be creative with this! 
