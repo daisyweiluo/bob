@@ -387,11 +387,6 @@ var ambientColor = new THREE.Color(0.4,0.4,0.4);
 // var kSpecular = 0.8;
 // var shininess = 10.0;
 
-//Texture
-var playballtexture = new THREE.Texture({map:playPic});
-var playballtexture2 = new THREE.Texture({map:playPic2});
-
-
 //var playMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:playPic} );
 // var playMaterial = new THREE.ShaderMaterial({
 //   // wireframe: true,
