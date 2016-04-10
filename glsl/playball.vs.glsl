@@ -10,12 +10,12 @@ uniform float Kd;
 uniform float Ks;
 uniform float N;
 
-uniform vec3 lightColor;
-uniform vec3 ambientColor;
+
 uniform vec3 lightPosition;
 
-uniform vec3 litArmadilloColor;
-uniform vec3 unlitArmadilloColor;
+uniform vec3 unlitColor;
+uniform vec3 ambientColor;
+
 
 void main() {
     vertPos = vec3(modelViewMatrix * vec4(position,0.0));
