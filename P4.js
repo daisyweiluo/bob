@@ -1,8 +1,10 @@
 // Luxi Xu, Wei Luo Project 4
 
 var stats;
-var instruction="You are smily face playball\n"+"Eat balls with smaller radius, your radius get bigger\n"
+var instruction="You are smily face playball\n"
+        +"Eat balls with smaller radius, your radius get bigger\n"
         +"Eat balls with bigger radius,  game over\n"
+        +"Drag balls to change it position\n"
         +"Eat wooden boxes, game over\n"
         +"AWSD to control direction of playball\n"
         +"Left/Right/Up/Down to control the view of camera\n"
@@ -44,7 +46,6 @@ function buildAxis( src, dst, colorHex, dashed ) {
         var axis = new THREE.Line( geom, mat, THREE.LinePieces );
 
         return axis;
-
 }
 
 var length = 100.0;
@@ -90,8 +91,21 @@ canvas.appendChild(renderer.domElement);
 var textureCube;
 
 
+<<<<<<< HEAD
 //SETUP MOUSE
 //var mouse = {x:0, y:0};
+=======
+//SET UP for plane
+var gPic=THREE.ImageUtils.loadTexture('ground.jpg');
+var gMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:gPic} );
+groundGeo = new THREE.BoxGeometry(5,0.1,5);
+//var normalMaterial = new THREE.MeshNormalMaterial();
+ground = new THREE.Mesh( groundGeo, gMaterial);
+var groundMatrix = getscaleMatrix(50,0.1,50);
+ground.applyMatrix(groundMatrix);
+ground.position.y = -2;
+scene.add(ground);
+>>>>>>> e8d4e5bfe6ae7efbf2fbfa9908ed4ece5b2c44db
 
 // SETUP CAMERA
 /*player camera */
@@ -135,30 +149,6 @@ renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
 renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
 renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
-//Set up ground
-// var groundGeometry = new THREE.PlaneGeometry(60, 60, 9, 9);
-// var groundmaterial = new THREE.MeshLambertMaterial();
-// var ground = new THREE.Mesh(groundGeometry, groundmaterial);
-// ground.rotation.z+=Math.PI;
-// scene.add(ground);
-
-/* Floor  */    
-// var geometry = new THREE.PlaneGeometry( 5, 20, 32);
-// var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-// var plane = new THREE.Mesh( geometry, material );
-// scene.add( plane );
-
-// var floor = new THREE.Mesh( geometry, material );
-// floor.material.side = THREE.DoubleSide;
-// floor.rotation.x = de2ra(90);
-// scene.add( floor );
-
-// SETUP ORBIT CONTROLS OF THE CAMERA
-// click on it, able to change its camera
-//var controls = new THREE.OrbitControls(camera);
-// controls.movementSpeed = 50;
-// controls.noFly= true;
-// controls.lookVertical=false;
 
 
 //Added Light
@@ -331,8 +321,8 @@ var boxgroups = [];
 for(var i=0; i<boxnumber; i++){
   boxgroups[i]= new THREE.Mesh( boxes[i], boxMaterial );
   boxgroups[i].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
-  boxgroups[i].position.y = -2+ len[i];
-  boxgroups[i].position.z = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
+  boxgroups[i].position.y = -2+ rad[r];
+  boxgroups[i].position.z =(Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
   scene.add( boxgroups[i] );
 }
 
@@ -900,7 +890,7 @@ gridGeometry.computeLineDistances();
 var gridMaterial = new THREE.LineDashedMaterial({vertexColors: THREE.VertexColors, linewidth: 1, dashSize: 2, gapSize: 0.5});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 grid_state=true;
-scene.add(grid);
+//scene.add(grid);
 
 // MATERIALS
 // Note: Feel free to be creative with this! 
