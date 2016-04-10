@@ -79,6 +79,8 @@ var canvas = document.getElementById('canvas');
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer({} );
 renderer.setClearColor( 0x000000, 0 ); // the default
+renderer.autoClear = false;
+
 //renderer.setClearColor(0xFC9E55); // white background colour
 // var node = document.createElement("P");                 // Create a <li> node
 // var textnode = document.createTextNode("Score");         // Create a text node
@@ -87,18 +89,19 @@ renderer.setClearColor( 0x000000, 0 ); // the default
 canvas.appendChild(renderer.domElement);
 var textureCube;
 
+
 //SETUP MOUSE
 //var mouse = {x:0, y:0};
 
 // SETUP CAMERA
 /*player camera */
-var camera = new THREE.PerspectiveCamera(30,1,0.1,1000); // view angle, aspect ratio, near, far
+var camera = new THREE.PerspectiveCamera(30,1,0.1,1600); // view angle, aspect ratio, near, far
 scene.add(camera);
 
 // ADDING THE AXIS DEBUG VISUALIZATIONS
-scene.add(x_axis);
-scene.add(y_axis);
-scene.add(z_axis);
+// scene.add(x_axis);
+// scene.add(y_axis);
+// scene.add(z_axis);
 
 //Set up ray caster
 var mouse = new THREE.Vector2(), INTERSECTED;
@@ -108,6 +111,22 @@ var mouse = new THREE.Vector2(),
 offset = new THREE.Vector3(),
 INTERSECTED, SELECTED;
 
+//SET UP SKYROME BACKGROUND
+var bgimage = THREE.ImageUtils.loadTexture('galaxy.jpg');
+var skygeometry = new THREE.SphereGeometry(1400, 60, 40);  
+var skyuniforms = {  
+  texture: { type: 't', value: bgimage}
+};
+
+var skymaterial = new THREE.ShaderMaterial( {  
+  uniforms:       skyuniforms,
+});
+
+skyBox = new THREE.Mesh(skygeometry, skymaterial);  
+skyBox.scale.set(-1, 1, 1);  
+skyBox.rotation.order = 'XZY';  
+skyBox.renderDepth = 1000.0; 
+scene.add(skyBox);
 
 //mouse
 // document.addEventListener( 'mousemove', onDocumentMouseMove, false );
@@ -143,9 +162,37 @@ renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
 
 //Added Light
-var light = new THREE.DirectionalLight( 0xffffff );
-light.position.set( 0, 0, 1 );
-scene.add( light );
+// var light = new THREE.DirectionalLight( 0xffffff );
+// light.position.set( 0, 0, 1 );
+// scene.add( light );
+
+//Added spot light
+spotLight = new THREE.SpotLight( 0xffffbb, 2 );
+spotLight.position.set( 0.5, 0, 0.5 );
+spotLight.position.multiplyScalar( 700 );
+scene.add( spotLight );
+spotLight.castShadow = true;
+// spotLight.shadowCameraVisible = true;
+spotLight.shadowMapWidth = 2048;
+spotLight.shadowMapHeight = 2048;
+spotLight.shadowCameraNear = 200;
+spotLight.shadowCameraFar = 1500;
+spotLight.shadowCameraFov = 40;
+spotLight.shadowBias = -0.005;
+
+//Spotlight 2:
+spotLight2 = new THREE.SpotLight( 0xffffbb, 2 );
+spotLight2.position.set( -0.5, 0, -0.5 );
+spotLight2.position.multiplyScalar( 100 );
+scene.add( spotLight2 );
+spotLight2.castShadow = true;
+// spotLight.shadowCameraVisible = true;
+spotLight2.shadowMapWidth = 2048;
+spotLight2.shadowMapHeight = 2048;
+spotLight2.shadowCameraNear = 200;
+spotLight2.shadowCameraFar = 1500;
+spotLight2.shadowCameraFov = 40;
+spotLight2.shadowBias = -0.005;
 
 //motion parameters
 var motion = {
@@ -197,14 +244,14 @@ var faces = [];
 var geos =[];
 //0=eatable, 1=bad, 2=portion
 var type = [];
-var ballnumber = 50;
+var ballnumber = 100;
 var boxnumber = 10;
 
 //generate randomized radius
 for(var r=0; r<ballnumber;  r++){
   rad[r] = getRandomInt(2,5);
-  //geos[r] = new THREE.IcosahedronGeometry( rad[r], 1 );
-  geos[r] = new THREE.SphereGeometry(rad[r],32,32)
+  geos[r] = new THREE.IcosahedronGeometry( rad[r], 1);
+  //geos[r] = new THREE.SphereGeometry(rad[r],32,32)
 
 }
 
@@ -237,6 +284,15 @@ for ( var i = 0; i < geometry.faces.length; i ++ ) {
   }
 }
 
+
+
+//Load balls' textures
+var playPic=THREE.ImageUtils.loadTexture('moonbumpmap2.jpg');
+var playPic2 = THREE.ImageUtils.loadTexture('moonbumpmap.jpg');
+var woodPic = THREE.ImageUtils.loadTexture('woodbump.jpg');
+var earthPic = THREE.ImageUtils.loadTexture('earth.jpg');
+
+
 //random ball's material
 var materials = [
 new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 } ),
@@ -244,7 +300,7 @@ new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wire
 ];
 
 var scoreballPic=THREE.ImageUtils.loadTexture('scorePic.png');
-var scoreMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:scoreballPic} );
+var scoreMaterial = new THREE.MeshPhongMaterial( {specular: 0x222222, shininess: 5,shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:scoreballPic, bumpMap:playPic2, bumpScale:0.45} );
 
 //Add the balls to the scene
 var groups = [];
@@ -268,7 +324,7 @@ new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wire
 ];
 
 var boxPic=THREE.ImageUtils.loadTexture('boxPic.png');
-var boxMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:boxPic} );
+var boxMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:boxPic, bumpMap: woodPic, bumpScale:1} );
 
 //Add the balls to the scene
 var boxgroups = [];
@@ -280,10 +336,7 @@ for(var i=0; i<boxnumber; i++){
   scene.add( boxgroups[i] );
 }
 
-
-
-//add play balls
-var playPic=THREE.ImageUtils.loadTexture('playPic.png');
+//var playPic3 = THREE.ImageUtils.loadTexture('https://s3-us-west-2.amazonaws.com/s.cdpn.io/33170/egyptian_friz_2.png');
 //var shader = sobelShader;
 
 // LOAD SHADERS
@@ -292,8 +345,11 @@ var shaderFiles = [
   'glsl/playball.fs.glsl',
   'glsl/playball2.vs.glsl',
   'glsl/playball2.fs.glsl',
-    'glsl/fresnel.vs.glsl',
+  'glsl/fresnel.vs.glsl',
   'glsl/fresnel.fs.glsl',
+  'glsl/sky.vs.glsl',
+  'glsl/sky.fs.glsl',
+
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -303,10 +359,14 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
    // playMaterial.vertexShader = shaders['glsl/playball2.vs.glsl'];
    // playMaterial.fragmentShader = shaders['glsl/playball2.fs.glsl'];
 
-    playMaterial.vertexShader = shaders['glsl/fresnel.vs.glsl'];
-   playMaterial.fragmentShader = shaders['glsl/fresnel.fs.glsl'];
+  //   playMaterial.vertexShader = shaders['glsl/fresnel.vs.glsl'];
+  //  playMaterial.fragmentShader = shaders['glsl/fresnel.fs.glsl'];
 
-  playMaterial.needsUpdate = true;
+  // playMaterial.needsUpdate = true;
+
+  skymaterial.vertexShader = shaders['glsl/sky.vs.glsl'];
+  skymaterial.fragmentShader = shaders['glsl/sky.fs.glsl'];
+  skymaterial.needsUpdate =true;
 
 });
 
@@ -329,31 +389,43 @@ var ambientColor = new THREE.Color(0.4,0.4,0.4);
 
 //Texture
 var playballtexture = new THREE.Texture({map:playPic});
+var playballtexture2 = new THREE.Texture({map:playPic2});
+
 
 //var playMaterial = new THREE.MeshBasicMaterial( { shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0 ,map:playPic} );
-var playMaterial = new THREE.ShaderMaterial({
-  // wireframe: true,
-uniforms: {
-            time: { type: "f", value: 0 },
-            TexCube: { type: "t", value: THREE.ImageUtils.loadTextureCube( [ "boxPic.jpg", "boxPic.jpg", // cube texture
-                                                                     "boxPic.jpg", "boxPic.jpg", 
-                                                                     "boxPic.jpg", "boxPic.jpg" ] ) },
-             width: {type: 'f',value: 320.0},
-             height: {type: 'f',value: 240.0},
-             color : {type : 'c' , value:lightColor},
-             cameraPos: {type : 'v3', value: camera.position},
+// var playMaterial = new THREE.ShaderMaterial({
+//   // wireframe: true,
+// uniforms: {
+//             time: { type: "f", value: 0 },
+//             TexCube: { type: "t", value: THREE.ImageUtils.loadTextureCube( [ "boxPic.jpg", "boxPic.jpg", // cube texture
+//                                                                      "boxPic.jpg", "boxPic.jpg", 
+//                                                                      "boxPic.jpg", "boxPic.jpg" ] ) },
+//              width: {type: 'f',value: 320.0},
+//              height: {type: 'f',value: 240.0},
+//              color : {type : 'c' , value:lightColor},
+//              cameraPos: {type : 'v3', value: camera.position},
 
-     //lightColor : {type : 'c', value: litArmadilloColor},
-     ambientColor : {type : 'c', value: ambientColor},
-     // lightPosition : {type: 'v3', value: lightPosition},
-     // litArmadilloColor: {type : 'c', value: litArmadilloColor},
-     // unlitArmadilloColor: {type : 'c', value: unLitArmadilloColor},
-      Ka : {type : 'f', value: kAmbient},
-     // Kd : {type : 'f', value: kDiffuse},
-     // Ks : {type : 'f', value: kSpecular},
-     // N : {type : 'f', value: shininess},
-   },
-    });
+//      //lightColor : {type : 'c', value: litArmadilloColor},
+//      ambientColor : {type : 'c', value: ambientColor},
+//      // lightPosition : {type: 'v3', value: lightPosition},
+//      // litArmadilloColor: {type : 'c', value: litArmadilloColor},
+//      // unlitArmadilloColor: {type : 'c', value: unLitArmadilloColor},
+//       Ka : {type : 'f', value: kAmbient},
+//      // Kd : {type : 'f', value: kDiffuse},
+//      // Ks : {type : 'f', value: kSpecular},
+//      // N : {type : 'f', value: shininess},
+//    },
+//     });
+
+var playMaterial =  new THREE.MeshPhongMaterial( {
+          //color: 0x552811,
+          //color: 0xBC4C42,
+          specular: 0x222222,
+          shininess: 10,
+          map: playPic,
+          bumpMap: playPic,
+          bumpScale: 0.45
+        } );
 
 var playballgeometry = new THREE.SphereGeometry( 3.5, 32, 32 );
 playballgeometry.dynamic=true;
@@ -387,6 +459,19 @@ camera.applyMatrix(cameraMatrix);
 
 scene.add( playball );
 camera.lookAt(playball.position);
+
+//Glowing playball
+var scale = 15;
+var spriteMaterial = new THREE.SpriteMaterial( 
+  { 
+    map: new THREE.ImageUtils.loadTexture( 'glow.png' ), 
+    color: 0x0000ff,
+    fog: true,
+    transparent: false, blending: THREE.AdditiveBlending
+  });
+  var sprite = new THREE.Sprite( spriteMaterial );
+  sprite.scale.set(scale, scale, 1.0);
+  playball.add(sprite); // this centers the glow at the playball
 
 //forward
 motion.forward.subVectors(playball.position,camera.position);
@@ -505,6 +590,10 @@ function collision(){
             groups.splice(r,1);
             ballnumber--;
 
+            //make the ball glow more
+            scale += 1;
+            sprite.scale.set(scale, scale, 1.0);
+
             var temp = playball.matrix;
             playball.applyMatrix(gettransMatrix(-xPlay, -yPlay, -zPlay));
             playball.applyMatrix(getscaleMatrix(rate,rate,rate));
@@ -512,7 +601,7 @@ function collision(){
             playball.applyMatrix(gettransMatrix(xPlay, playballRad-2, zPlay));
             playball.geometry.verticesNeedUpdate = true;
 
-            transMatrix = multiplyHelper(transMatrix, getscaleMatrix(0.8,0.8,0.8));
+            //transMatrix = multiplyHelper(transMatrix, getscaleMatrix(0.99,0.99,0.99));
 
             var cameratransMatrix = multiplyHelper(temp, transMatrix);
             camera.setMatrix(cameratransMatrix);
@@ -791,15 +880,24 @@ window.onscroll = function () {
 // Note: Press Z to show/hide
 var gridGeometry = new THREE.Geometry();
 var i;
-
-for(i=-150;i<151;i+=5) {
+var colors=[];
+var hsl;
+//size of the grid is 150*150
+for(i=-150;i<151;i+=7) {
   gridGeometry.vertices.push( new THREE.Vector3(i,-2,-150));
   gridGeometry.vertices.push( new THREE.Vector3(i,-2,150));
-  // gridGeometry.vertices.push( new THREE.Vector3(-150,-2,i));
-  // gridGeometry.vertices.push( new THREE.Vector3(150,-2,i));
-}
+   // gridGeometry.vertices.push( new THREE.Vector3(-150,-2,i));
+   // gridGeometry.vertices.push( new THREE.Vector3(150,-2,i));
+  colors.push( new THREE.Color( 0xffffff ));
+  colors[colors.length-1].setHSL( i / 300, 1.0, 0.5 );
+    colors.push( new THREE.Color( 0xffffff ));
+  colors[colors.length-1].setHSL( -i / 300, 1.0, 0.5 );
 
-var gridMaterial = new THREE.LineBasicMaterial({color:0xBBBBBB});
+}
+gridGeometry.colors = colors;
+gridGeometry.computeLineDistances();
+
+var gridMaterial = new THREE.LineDashedMaterial({vertexColors: THREE.VertexColors, linewidth: 1, dashSize: 2, gapSize: 0.5});
 var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 grid_state=true;
 scene.add(grid);
@@ -925,7 +1023,7 @@ function update() {
           // camera.position.x = Math.cos( timer ) * 70;
           // camera.position.z = Math.sin( timer ) * 70;
           var delta = clock.getDelta();
-          playMaterial.uniforms.time.value += delta * 10;
+          //playMaterial.uniforms.time.value += delta * 10;
 
       //     for(var b=0; b< bullets.length; b++){
       //       if(Math.abs(bullets[b].position.x)>100 | Math.abs(bullets[b].position.z)>100){
@@ -937,11 +1035,21 @@ function update() {
 
       //   }
       // }
+      if(Math.abs(playball.position.y)>150){
+        alert("You fall into a blackhole");
+        location.reload();
+      }
+      if(Math.abs(playball.position.x)>150 | Math.abs(playball.position.z)>150){
+              playball.applyMatrix(gettransMatrix(0,-0.5,0));
+              camera.lookAt(playball.position);
+              keyboard.destroy();
+      }
 
             collision();
             renderer.render(scene,camera);
             requestAnimationFrame(update);
             stats.update();
+
 
   }
 //requestAnimationFrame( update );
