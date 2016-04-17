@@ -17,7 +17,9 @@ Advanced functionality:
 
 -Build obstacles with textures and bumpy maps to make the scene more realistic
 
--Fresnel shader implemented using an approximation of the Fresnel Equation
+-A colorful shader for boxes(changing with time)
+
+-Tried to implement Fresnel shader using an approximation of the Fresnel Equation
 		
 
 • how: mid-level description of the algorithms and data structures that you’ve used

@@ -51,12 +51,39 @@
       #stats #fps { background: transparent !important }
       #stats #fps #fpsText { color: #555 !important }
       #stats #fps #fpsGraph { display: none }
+
+      #blocker {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+      }
+      #instructions {
+        width: 100%;
+        height: 100%;
+        display: -webkit-box;
+        display: -moz-box;
+        display: box;
+        -webkit-box-orient: horizontal;
+        -moz-box-orient: horizontal;
+        box-orient: horizontal;
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        box-pack: center;
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        box-align: center;
+        color: #ffffff;
+        text-align: center;
+        cursor: pointer;
+      }
     </style>
     </style>
   </head>
   <body>
-    <div id="canvas"></div>
-    <div id="info">
+    <div id="canvas">
+
+          <div id="info">
     <info>
             <a>Score:</a>
             <a id="Score"></a></br>  
@@ -65,18 +92,17 @@
             <a>Bullet Left:</a>
             <a id="Bullet"></a>
     </info>
+      <div id="blocker">
 
-    <hh>
-        <a> You are smily face playball</a></br>
-        <a>Eat balls with smaller radius, your radius get bigger</a></br>
-        <a>Eat balls with bigger radius,  game over</a></br>
-        <a>Drag balls to change it position</a></br>
-        <a>Eat wooden boxes, game over</a></br>
-        <a>AWSD to control direction of playball</a></br>
-        <a>Left/Right/Up/Down to control the view of camera</a></br>
-        <a>Use space to use bullet to shoot bigger balls</a></br>
+      <div id="instructions">
+        <span style="font-size:40px">Click to play</span>
+        <br />
+        (W, A, S, D = Move, L/R/U/D Arrow = Look around, MOUSE = Drag around)
+      </div>
 
-    </hh>
+    </div>
+    </div>
+
 
     <script src="js/three.min.js"></script>
      <script src="js/Raycaster.js"></script>
@@ -92,6 +118,8 @@
     <!-- By Jerome Etienne: http://jetienne.com/ -->
 
 <script src="P4.js"></script>
+
+
 </body>
 </html>
 

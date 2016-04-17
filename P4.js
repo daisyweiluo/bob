@@ -9,7 +9,7 @@ var instruction="You are smily face playball\n"
         +"AWSD to control direction of playball\n"
         +"Left/Right/Up/Down to control the view of camera\n"
         +"Use space to use bullet to shoot bigger balls\n";
-alert(instruction);
+//alert(instruction);
 
 // ASSIGNMENT-SPECIFIC API EXTENSION
 THREE.Object3D.prototype.setMatrix = function(a) {
@@ -47,6 +47,15 @@ function buildAxis( src, dst, colorHex, dashed ) {
 
         return axis;
 }
+
+//get blocker and instruction out
+var blocker = document.getElementById( 'blocker' );
+var instructions = document.getElementById( 'instructions' );
+
+instructions.addEventListener( 'click', function ( event ) {
+          instructions.style.display = 'none';
+          blocker.style.display= 'none';
+          });
 
 var length = 100.0;
 var shootingrange = 50.0;
@@ -316,14 +325,14 @@ uniforms: {  /* for playball2 shader */
     });
 
 //Add the boxes to the scene
-var boxgroups = [];
-for(var i=0; i<boxnumber; i++){
-  boxgroups[i]= new THREE.Mesh( boxes[i], boxMaterial );
-  boxgroups[i].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
-  boxgroups[i].position.y = -2+ len[i];
-  boxgroups[i].position.z =(Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
-  scene.add( boxgroups[i] );
-}
+// var boxgroups = [];
+// for(var i=0; i<boxnumber; i++){
+//   boxgroups[i]= new THREE.Mesh( boxes[i], boxMaterial );
+//   boxgroups[i].position.x = (Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
+//   boxgroups[i].position.y = -2+ len[i];
+//   boxgroups[i].position.z =(Math.random() < 0.5 ? -1 : 1)*(5+Math.random()*100);
+//   //scene.add( boxgroups[i] );
+// }
 
 
 // LOAD SHADERS
@@ -556,16 +565,16 @@ function collision(){
       }
       document.getElementById("Score").innerHTML = score;
 
-      //check collision for boxes
-       for (var r=0; r<boxnumber;r++){
-        boxdis=boxgroups[r].position.distanceTo(playball.position);
-        var boxDis= playballRad+ len[r]/2;
-        if (boxdis<=boxDis){
-            alert("eat boxes, game over! You score is "+score);
-            //restart a new game on collision
-            location.reload();
-          }
-        }          
+      // //check collision for boxes
+      //  for (var r=0; r<boxnumber;r++){
+      //   boxdis=boxgroups[r].position.distanceTo(playball.position);
+      //   var boxDis= playballRad+ len[r]/2;
+      //   if (boxdis<=boxDis){
+      //       alert("eat boxes, game over! You score is "+score);
+      //       //restart a new game on collision
+      //       location.reload();
+      //     }
+      //   }          
     }
 
 
